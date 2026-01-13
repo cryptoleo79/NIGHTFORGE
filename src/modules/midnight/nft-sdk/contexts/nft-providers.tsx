@@ -130,12 +130,13 @@ export const NFTProvider = ({ children, logger }: ProviderProps) => {
       isConnected && wallet
         ? {
             getCoinPublicKey(): ledger.CoinPublicKey {
-              const raw = wallet.getRawApi?.();
-              return (raw?.coinPublicKey || walletInfo?.shieldedAddress || "") as unknown as ledger.CoinPublicKey;
+              // Use coinPublicKey directly from wallet, NOT shieldedAddress
+              // shield-cpk != shield-addr - the contract expects cpk format
+              return (wallet.coinPublicKey || "") as unknown as ledger.CoinPublicKey;
             },
             getEncryptionPublicKey(): ledger.EncPublicKey {
-              const raw = wallet.getRawApi?.();
-              return (raw?.encryptionPublicKey || walletInfo?.shieldedAddress || "") as unknown as ledger.EncPublicKey;
+              // Use encryptionPublicKey directly from wallet
+              return (wallet.encryptionPublicKey || "") as unknown as ledger.EncPublicKey;
             },
             async balanceTx(
               tx: ledger.UnprovenTransaction,

@@ -284,10 +284,49 @@ export class MidnightWallet {
         this.walletType = 'unknown';
       }
 
-      // Get configuration
+      // Get configuration with validation
       try {
-        this.config = await this.connectedAPI.getConfiguration();
-      } catch {
+        const walletConfig = await this.connectedAPI.getConfiguration();
+
+        // Validate indexer URIs - some wallets return invalid URLs
+        const isValidHttpUrl = (url: string) => {
+          try {
+            const parsed = new URL(url);
+            return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+          } catch {
+            return false;
+          }
+        };
+
+        const isValidWsUrl = (url: string) => {
+          try {
+            const parsed = new URL(url);
+            return parsed.protocol === 'ws:' || parsed.protocol === 'wss:';
+          } catch {
+            return false;
+          }
+        };
+
+        // Use wallet config if valid, otherwise use defaults
+        this.config = {
+          indexerUri: isValidHttpUrl(walletConfig.indexerUri)
+            ? walletConfig.indexerUri
+            : PREVIEW_CONFIG.indexerUri,
+          indexerWsUri: isValidWsUrl(walletConfig.indexerWsUri)
+            ? walletConfig.indexerWsUri
+            : PREVIEW_CONFIG.indexerWsUri,
+          proverServerUri: walletConfig.proverServerUri && isValidHttpUrl(walletConfig.proverServerUri)
+            ? walletConfig.proverServerUri
+            : PREVIEW_CONFIG.proverServerUri,
+          substrateNodeUri: walletConfig.substrateNodeUri && isValidWsUrl(walletConfig.substrateNodeUri)
+            ? walletConfig.substrateNodeUri
+            : PREVIEW_CONFIG.substrateNodeUri || 'wss://rpc.preview.midnight.network',
+          networkId: walletConfig.networkId || networkId,
+        };
+
+        console.log('[Wallet] Configuration loaded:', this.config);
+      } catch (e) {
+        console.warn('[Wallet] Failed to get configuration, using defaults:', e);
         this.config = { ...PREVIEW_CONFIG, networkId };
       }
 
@@ -327,25 +366,79 @@ export class MidnightWallet {
   async refreshAddresses(): Promise<void> {
     if (!this.connectedAPI) return;
 
+    // First try to get state if available (MeshJS/Lace style)
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const api = this.connectedAPI as any;
+      if (typeof api.state === 'function') {
+        const walletState = await api.state();
+        console.log('[Wallet] state() response:', walletState);
+        if (walletState.address) {
+          this.shieldedAddress = walletState.address;
+        }
+        if (walletState.coinPublicKey) {
+          this.coinPublicKey = walletState.coinPublicKey;
+        }
+        if (walletState.encryptionPublicKey) {
+          this.encryptionPublicKey = walletState.encryptionPublicKey;
+        }
+      }
+    } catch (e) {
+      console.log('[Wallet] state() not available or failed:', e);
+    }
+
     try {
       const shielded = await this.connectedAPI.getShieldedAddresses();
-      this.shieldedAddress = shielded.shieldedAddress;
-      this.coinPublicKey = shielded.shieldedCoinPublicKey;
-      this.encryptionPublicKey = shielded.shieldedEncryptionPublicKey;
+      console.log('[Wallet] getShieldedAddresses response:', shielded);
+
+      // Handle different wallet implementations
+      if (Array.isArray(shielded)) {
+        // YAMORI returns array of strings
+        this.shieldedAddress = shielded[0] || null;
+        // Only set empty if we didn't get them from state()
+        if (!this.coinPublicKey) this.coinPublicKey = '';
+        if (!this.encryptionPublicKey) this.encryptionPublicKey = '';
+      } else if (typeof shielded === 'string') {
+        // Some wallets might return plain string
+        this.shieldedAddress = shielded;
+        if (!this.coinPublicKey) this.coinPublicKey = '';
+        if (!this.encryptionPublicKey) this.encryptionPublicKey = '';
+      } else {
+        // Standard object format
+        this.shieldedAddress = shielded.shieldedAddress;
+        this.coinPublicKey = shielded.shieldedCoinPublicKey || this.coinPublicKey || '';
+        this.encryptionPublicKey = shielded.shieldedEncryptionPublicKey || this.encryptionPublicKey || '';
+      }
     } catch (e) {
       console.log('[Wallet] getShieldedAddresses error:', e);
     }
 
     try {
       const unshielded = await this.connectedAPI.getUnshieldedAddress();
-      this.unshieldedAddress = unshielded.unshieldedAddress;
+
+      // Handle different wallet implementations
+      if (typeof unshielded === 'string') {
+        // YAMORI returns plain string
+        this.unshieldedAddress = unshielded;
+      } else {
+        // Standard object format
+        this.unshieldedAddress = unshielded.unshieldedAddress;
+      }
     } catch (e) {
       console.log('[Wallet] getUnshieldedAddress error:', e);
     }
 
     try {
       const dust = await this.connectedAPI.getDustAddress();
-      this.dustAddress = dust.dustAddress;
+
+      // Handle different wallet implementations
+      if (typeof dust === 'string') {
+        // YAMORI returns plain string
+        this.dustAddress = dust;
+      } else {
+        // Standard object format
+        this.dustAddress = dust.dustAddress;
+      }
     } catch (e) {
       console.log('[Wallet] getDustAddress error:', e);
     }
