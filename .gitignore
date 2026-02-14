@@ -10,7 +10,12 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dist-explorer
 *.local
+.vite
+*.backup*
+*.bak*
+explorer-old-backup
 
 # Editor directories and files
 .vscode/*

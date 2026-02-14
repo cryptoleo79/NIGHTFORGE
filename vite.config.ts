@@ -1,65 +1,89 @@
 import path from "path"
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { viteCommonjs } from '@originjs/vite-plugin-commonjs';
 import wasm from 'vite-plugin-wasm';
 import topLevelAwait from 'vite-plugin-top-level-await';
 import tailwindcss from "@tailwindcss/vite"
-import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig({
+  cacheDir: './.vite',
   define: {
-    'process.env.NODE_ENV': JSON.stringify(mode === 'production' ? 'production' : 'development'),
     'process.env': {},
     global: 'globalThis',
   },
   plugins: [
-    nodePolyfills({
-      // To add only specific polyfills, add them here.
-      // If no specific polyfills are needed, you can leave this empty.
-      include: ['buffer', 'process'],
-      globals: {
-        Buffer: true,
-        process: true,
-      },
-    }),
-    wasm(),
     react(),
-    viteCommonjs(),
-    topLevelAwait(),
+    wasm(),
+    topLevelAwait({
+      promiseExportName: '__tla',
+      promiseImportName: (i) => `__tla_${i}`,
+    }),
     tailwindcss(),
+    {
+      name: 'wasm-module-resolver',
+      resolveId(source, importer) {
+        if (
+          source === '@midnight-ntwrk/onchain-runtime-v1' &&
+          importer &&
+          importer.includes('@midnight-ntwrk/compact-runtime')
+        ) {
+          return {
+            id: source,
+            external: false,
+            moduleSideEffects: true,
+          };
+        }
+        return null;
+      },
+    },
   ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      // Add any other aliases you need
     },
+    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.wasm'],
+    mainFields: ['browser', 'module', 'main'],
   },
   optimizeDeps: {
     esbuildOptions: {
-      // Node.js global to browser globalThis
+      target: 'esnext',
+      supported: { 'top-level-await': true },
+      platform: 'browser',
+      format: 'esm',
       define: {
         global: 'globalThis',
       },
+      loader: {
+        '.wasm': 'binary',
+      },
     },
+    include: ['@midnight-ntwrk/compact-runtime'],
     exclude: [
-      "@midnight-ntwrk/onchain-runtime"
+      '@midnight-ntwrk/onchain-runtime-v1',
+      '@midnight-ntwrk/onchain-runtime-v1/midnight_onchain_runtime_wasm_bg.wasm',
+      '@midnight-ntwrk/onchain-runtime-v1/midnight_onchain_runtime_wasm.js',
     ],
   },
   build: {
+    target: 'esnext',
+    minify: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          wasm: ['@midnight-ntwrk/onchain-runtime-v1'],
+        },
+      },
+    },
     commonjsOptions: {
       transformMixedEsModules: true,
-    },
-    rollupOptions: {
-      // Ensure proper handling of Node.js built-ins
-      external: [],
+      extensions: ['.js', '.cjs'],
+      ignoreDynamicRequires: true,
     },
   },
   server: {
     fs: {
-      // Allow serving files from one level up from the package root
       allow: ['..'],
     },
   },
-}))
+})

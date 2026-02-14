@@ -139,6 +139,20 @@ const PREVIEW_CONFIG: WalletConfig = {
   networkId: "preview"
 };
 
+
+const getNetworkConfig = () => {
+  const host = window.location.hostname;
+  if (host.startsWith("testnet.")) return "testnet";
+  return "preview";
+};
+const TESTNET_CONFIG = {
+  indexerUri: "https://indexer.testnet-02.midnight.network/api/v1/graphql",
+  indexerWsUri: "wss://indexer.testnet-02.midnight.network/api/v1/graphql/ws",
+  proverServerUri: "https://prover.testnet-02.midnight.network",
+  substrateNodeUri: "wss://rpc.testnet-02.midnight.network",
+  networkId: "testnet"
+};
+
 // Get window.midnight safely
 const getMidnight = (): Record<string, InitialAPI> | undefined => (window as any).midnight;
 

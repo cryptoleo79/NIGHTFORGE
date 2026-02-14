@@ -19,10 +19,14 @@ const NightPriceWidget = () => {
   const [price, setPrice] = useState<number | null>(null);
   const [change, setChange] = useState<number | null>(null);
   const [mcap, setMcap] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
   useEffect(() => {
     const fetchPrice = async () => {
       try {
-        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=midnight-3&vs_currencies=usd&include_24hr_change=true&include_market_cap=true');
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 3000);
+        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=midnight-3&vs_currencies=usd&include_24hr_change=true&include_market_cap=true', { signal: controller.signal });
+        clearTimeout(timeout);
         const data = await res.json();
         if (data['midnight-3']) {
           setPrice(data['midnight-3'].usd);
@@ -31,15 +35,17 @@ const NightPriceWidget = () => {
           setMcap(cap >= 1e9 ? `$${(cap/1e9).toFixed(2)}B` : `$${(cap/1e6).toFixed(0)}M`);
         }
       } catch (e) {}
+      setLoaded(true);
     };
     fetchPrice();
     const interval = setInterval(fetchPrice, 60000);
     return () => clearInterval(interval);
   }, []);
+  if (!loaded) return null;
   if (!price) return (
     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700">
       <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-xs font-bold text-white">◐</div>
-      <span className="text-xs text-slate-400">NIGHT loading...</span>
+      <span className="text-xs text-slate-400">NIGHT $--</span>
     </div>
   );
   return (
@@ -85,9 +91,9 @@ const ExplorerControls = () => {
 
   const goToNetwork = (network: string) => {
     if (network === 'preview') {
-      window.location.href = 'https://preview.nightforge.jp/explorer';
+      window.location.href = 'https://preview.nightforge.jp/';
     } else {
-      window.location.href = 'https://testnet.nightforge.jp/explorer';
+      window.location.href = 'https://testnet.nightforge.jp/';
     }
   };
 
@@ -133,15 +139,23 @@ const NavItem = ({ to, children, end = false }: { to: string; children: React.Re
   const location = useLocation();
   const onSubdomain = isSubdomain();
   const isActive = end ? location.pathname === to : location.pathname.startsWith(to);
-  
-  if (onSubdomain && to !== '/explorer') {
+
+  if (onSubdomain) {
+    // On subdomain, "/" is explorer, everything else goes to main site
+    if (to === '/explorer' || to === '/') {
+      return (
+        <NavLink to="/" className={({ isActive }) => `font-semibold transition hover:text-cyan-400 ${isActive ? 'text-cyan-400' : 'text-slate-300'}`} end>
+          {children}
+        </NavLink>
+      );
+    }
     return (
       <a href={getMainUrl(to)} className={`font-semibold transition hover:text-cyan-400 text-slate-300`}>
         {children}
       </a>
     );
   }
-  
+
   return (
     <NavLink to={to} className={({ isActive }) => `font-semibold transition hover:text-cyan-400 ${isActive ? 'text-cyan-400' : 'text-slate-300'}`} end={end}>
       {children}
@@ -152,7 +166,7 @@ const NavItem = ({ to, children, end = false }: { to: string; children: React.Re
 export const MainLayout = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const isExplorer = location.pathname.startsWith('/explorer');
+  const isExplorer = isSubdomain() || location.pathname === "/" || location.pathname.startsWith("/explorer") || location.pathname.startsWith("/block") || location.pathname.startsWith("/tx");
   
   return (
     <div className="min-h-screen flex flex-col bg-[#020817]">
@@ -171,7 +185,7 @@ export const MainLayout = () => {
             <div className="hidden md:flex gap-5 shrink-0">
               <NavItem to="/" end>Home</NavItem>
               <NavItem to="/real-nft">🎨 NFT Minter</NavItem>
-              <NavItem to="/explorer">🔍 Explorer</NavItem>
+              
               
             </div>
             <button className="md:hidden p-2 text-slate-300 hover:text-cyan-400" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -182,7 +196,7 @@ export const MainLayout = () => {
             <div className="md:hidden bg-[#0a1628]/95 backdrop-blur-md border-t border-cyan-900/30 px-4 py-3 space-y-3">
               <a href={getMainUrl('/')} onClick={() => setMobileMenuOpen(false)} className="block py-2 font-semibold transition text-slate-300 hover:text-cyan-400">Home</a>
               <a href={getMainUrl('/real-nft')} onClick={() => setMobileMenuOpen(false)} className="block py-2 font-semibold transition text-slate-300 hover:text-cyan-400">🎨 NFT Minter</a>
-              <a href="/explorer" onClick={() => setMobileMenuOpen(false)} className="block py-2 font-semibold transition text-slate-300 hover:text-cyan-400">🔍 Explorer</a>
+              <a href={isSubdomain() ? '/' : '/explorer'} onClick={() => setMobileMenuOpen(false)} className="block py-2 font-semibold transition text-slate-300 hover:text-cyan-400">🔍 Explorer</a>
               
             </div>
           )}

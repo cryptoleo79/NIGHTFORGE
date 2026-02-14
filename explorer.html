@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Night Forge Explorer</title>
+    <style>
+      body { background: #020817; margin: 0; }
+      .loading { display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; gap: 1rem; }
+      .loading-spinner { width: 40px; height: 40px; border: 3px solid #1e3a5f; border-top-color: #06b6d4; border-radius: 50%; animation: spin 1s linear infinite; }
+      .loading-text { color: #64748b; font-family: system-ui; font-size: 14px; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading Explorer...</div>
+      </div>
+    </div>
+    <script type="module" src="/src/explorer-main.tsx"></script>
+  </body>
+</html>
