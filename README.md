@@ -1,54 +1,65 @@
-# React + TypeScript + Vite
+# NightForge Explorer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Privacy-first blockchain explorer for [Midnight Network](https://midnight.network) - Built in Japan.
 
-Currently, two official plugins are available:
+## Live Sites
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Mainnet**: [mainnet.nightforge.jp](https://mainnet.nightforge.jp)
+- **Preprod**: [preprod.nightforge.jp](https://preprod.nightforge.jp)
+- **Preview**: [preview.nightforge.jp](https://preview.nightforge.jp)
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Privacy Dashboard** - Shielded/unshielded transaction ratio, ZK proof badges
+- **On-Chain Governance** - Council proposals, votes, technical committee tracking
+- **Cardano Anchor Points** - Cross-chain checkpoint visualization
+- **Epoch Timeline** - Session tracking, validator rotations, countdown
+- **Bridge Monitor** - Cardano - Midnight bridge operations
+- **Contract Tracking** - Deployed contracts from on-chain events
+- **DUST Explainer** - Midnight's unique fee mechanism
+- **Japanese/English** - Full JP/EN language toggle
+- **API Documentation** - Interactive docs at `/api/{network}/docs`
+- **Live Block Pulse** - Chain heartbeat animation
+- **Network Age** - Live uptime counter
+- **Multi-Network** - Switch between mainnet, preprod, preview
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## Architecture
+
+```
+explorers/
+  mainnet/    # Node.js backend (port 3005)
+  preprod/    # Node.js backend (port 3004)
+  preview/    # Node.js backend (port 3000)
+
+frontends/
+  mainnet.html  # Self-contained HTML + JS + CSS
+  preprod.html
+  preview.html
+  assets/       # Favicon, logos
+
+nginx/            # Nginx site configs
+systemd/          # Systemd service files
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Tech Stack
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- **Backend**: Node.js + Express + SQLite (better-sqlite3) + Polkadot.js API
+- **Frontend**: Self-contained HTML with Tailwind CSS + Chart.js
+- **Indexer**: Real-time block/extrinsic/event indexing via WebSocket RPC
+- **Transaction Decoder**: Midnight transaction classification (shielded/unshielded)
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+## API Endpoints
+
+Full interactive documentation available at each site under `/api/{network}/docs`
+
+## Setup
+
+```bash
+cd explorers/mainnet
+npm install
+npx tsx src/index.ts
 ```
+
+## License
+
+MIT

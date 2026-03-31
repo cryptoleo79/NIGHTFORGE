@@ -1,8 +1,0 @@
-{
-  "version": 3,
-  "file": "index.cjs",
-  "sourceRoot": "../../../../",
-  "sources": ["src/SimpleNFT.compact", "compiler/standard-library.compact"],
-  "names": [],
-  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EAiBA;;;;;;;;;;;;;MAUA,AAAA,IAKC;;;;;cALmB,KAAqB;;;;;;;;;;;yCAArB,KAAqB;;;;;;;iEAArB,KAAqB;;;OAKxC;MAGD,AAAA,WAGC;;;;;;;;;;;;;;;;;;;;;;OAAA;MAGD,AAAA,SAEC;;OAAA;;;;;;GAtBA;EAJD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;IANA;;;;;;;;;uDAA2B;IAC3B;;;;;;;;;uDAAgD;IAChD;;;;;;;;;uDAA+B;IAC/B;;;;;;;;;uDAA+B;IAI7B;;;;;;;;;uDAAK;UACL,KAAQ;IAAR;;;;;;;yGAAA,KAAQ;;uDAAA;UACR,KAAO;IAAP;;;;;;;;;;2EAAA,KAAO;;;;sDAAA;;;;;;;GACR;ECED,AAAA,QAAuB,0CACkB;EAGzC,AAAA;EAqBA,AAAA,kBAAiC;oEAAA;;;EDxBjC,AAAA,iBAAoC;;0DAApC,cAAoC;;;;;;;;;;;;;;GAAA;EAGpC,AAAA,OAKC,4BALmB,KAAqB;oDAChC;;;;;;;;;;;uGAAK;;;;UACZ,KAAK;;;iGAAwC;;;;;;;;;;;oJAAO;;IAApD;;;;;;;yGAAA,KAAK;;uDAAA;UACL,KAAQ,gBAAmC,KAAG;IAA9C;;;;;;;yGAAA,KAAQ;;uDAAA;IACR;;;;;;;;;uDAAK;;GACN;EAGD,AAAA,cAGC;oDAFQ;;;;;;;;;;;uGAAK;;;;mCACL;;;;;;;;;;;sFAAQ;GAChB;EAGD,AAAA,YAEC,CAFwB,IAAa,EAAE,IAAa;;mCACc,IAAE;mCAAE,IAAE;GACxE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;IAhCD;qCAAA;;;;;;;;;;;wFAA2B;KAAA;IAC3B;qCAAA;;;;;;;;;;;wFAAgD;KAAA;IAChD;qCAAA;;;;;;;;;;;wFAA+B;KAAA;IAC/B;qCAAA;;;;;;;;;;;wFAA+B;KAAA;;;;;;;;;EA2B/B,AAAA,SAEC;;;;UAFwB,IAAa;UAAE,IAAa;;;;;;;;;;;;;;;uCAA5B,IAAa,EAAE,IAAa;GAEpD;;;;;;;"
-}
