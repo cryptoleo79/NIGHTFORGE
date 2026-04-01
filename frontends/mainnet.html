@@ -1072,7 +1072,6 @@
               <thead>
                 <tr class="border-b border-slate-700/30">
                   <th class="text-left px-4 py-3 text-xs text-cyan-400 uppercase">Midnight Epoch</th>
-                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="duration">Duration</th>
                   <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase">Blocks</th>
                   <th class="text-left px-4 py-3 text-xs text-blue-400 uppercase">Cardano Epoch</th>
                   <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="started">Started</th>
@@ -1080,7 +1079,7 @@
                 </tr>
               </thead>
               <tbody id="epochHistoryTable" class="divide-y divide-slate-700/20">
-                <tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">Loading epoch data...</td></tr>
+                <tr><td colspan="5" class="px-4 py-8 text-center text-slate-500">Loading epoch data...</td></tr>
               </tbody>
             </table>
           </div>
@@ -3160,16 +3159,15 @@ function loadEpochs(){
 
         html+='<tr class="hover:bg-slate-800/30 transition'+(isFirst?' bg-cyan-500/5':'')+'">';
         html+='<td class="px-4 py-3"><span class="text-cyan-400 font-bold text-sm">'+fmt(epNum)+'</span></td>';
-        html+='<td class="px-4 py-3 text-sm text-slate-300">'+durationStr+'</td>';
         html+='<td class="px-4 py-3 text-sm text-slate-300 font-mono">'+blocksStr+'</td>';
-        html+='<td class="px-4 py-3"><span class="text-blue-400 font-medium text-sm">'+fmt(cardanoEp)+'</span><span class="text-[10px] text-slate-600 ml-1">(~5d)</span></td>';
+        html+='<td class="px-4 py-3"><span class="text-blue-400 font-medium text-sm">'+fmt(cardanoEp)+'</span></td>';
         html+='<td class="px-4 py-3 text-xs text-slate-400">'+timeAgo(ts)+'</td>';
         html+='<td class="px-4 py-3 text-right">'+statusBadge+'</td>';
         html+='</tr>';
       });
       historyEl.innerHTML=html;
     }else if(historyEl){
-      historyEl.innerHTML='<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">No epoch data available</td></tr>';
+      historyEl.innerHTML='<tr><td colspan="5" class="px-4 py-8 text-center text-slate-500">No epoch data available</td></tr>';
     }
 
     // Session Changes table
@@ -3194,7 +3192,7 @@ function loadEpochs(){
   }).catch(function(e){
     console.log("Epochs data error:",e);
     var hEl=document.getElementById("epochHistoryTable");
-    if(hEl)hEl.innerHTML='<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">No epoch data available</td></tr>';
+    if(hEl)hEl.innerHTML='<tr><td colspan="5" class="px-4 py-8 text-center text-slate-500">No epoch data available</td></tr>';
     document.getElementById("epochSessionTable").innerHTML='<tr><td colspan="3" class="px-4 py-8 text-center text-slate-500">No data available</td></tr>';
   });
 
