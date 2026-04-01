@@ -1059,29 +1059,61 @@
           </div>
         </div>
 
-        <!-- Epoch History Table -->
-        <div class="glass rounded-2xl border border-slate-700/50 overflow-hidden mb-6">
-          <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/30 to-purple-500/30 flex items-center justify-center"><span class="text-sm">⏱</span></div>
-              <div><h3 class="font-semibold text-white" data-i18n="epochHistory">Epoch History</h3><p class="text-xs text-slate-500">Recent epoch progression</p></div>
+        <!-- Epoch Relationship -->
+        <div class="grid lg:grid-cols-2 gap-6 mb-6">
+          <!-- Midnight Epochs -->
+          <div class="glass rounded-2xl border border-cyan-500/20 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-700/30 bg-gradient-to-r from-cyan-500/5 to-transparent">
+              <h3 class="font-semibold text-cyan-400">Midnight Epochs</h3>
+              <p class="text-xs text-slate-500">~30 min each, ~50 blocks per epoch</p>
+            </div>
+            <div class="p-6">
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="bg-slate-900/50 rounded-xl p-3 text-center">
+                  <p class="text-xs text-slate-500">Epochs Today</p>
+                  <p id="epochsToday" class="text-2xl font-bold text-cyan-400">--</p>
+                </div>
+                <div class="bg-slate-900/50 rounded-xl p-3 text-center">
+                  <p class="text-xs text-slate-500">Blocks Today</p>
+                  <p id="blocksToday" class="text-2xl font-bold text-white">--</p>
+                </div>
+              </div>
+              <div id="recentEpochsList" class="space-y-2 max-h-64 overflow-y-auto">
+                <p class="text-center text-slate-500 text-sm py-4">Loading...</p>
+              </div>
             </div>
           </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-              <thead>
-                <tr class="border-b border-slate-700/30">
-                  <th class="text-left px-4 py-3 text-xs text-cyan-400 uppercase">Midnight Epoch</th>
-                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase">Blocks</th>
-                  <th class="text-left px-4 py-3 text-xs text-blue-400 uppercase">Cardano Epoch</th>
-                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="started">Started</th>
-                  <th class="text-right px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="status">Status</th>
-                </tr>
-              </thead>
-              <tbody id="epochHistoryTable" class="divide-y divide-slate-700/20">
-                <tr><td colspan="5" class="px-4 py-8 text-center text-slate-500">Loading epoch data...</td></tr>
-              </tbody>
-            </table>
+          <!-- Cardano Epoch -->
+          <div class="glass rounded-2xl border border-blue-500/20 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-700/30 bg-gradient-to-r from-blue-500/5 to-transparent">
+              <h3 class="font-semibold text-blue-400">Cardano Epoch</h3>
+              <p class="text-xs text-slate-500">~5 day epochs on Cardano mainchain</p>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center justify-center mb-6">
+                <div class="text-center">
+                  <p class="text-5xl font-bold text-blue-400" id="cardanoEpochBig">--</p>
+                  <p class="text-sm text-slate-400 mt-1">Current Cardano Epoch</p>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="bg-slate-900/50 rounded-xl p-3 text-center">
+                  <p class="text-xs text-slate-500">Cardano Slot</p>
+                  <p id="cardanoSlotBig" class="text-sm font-mono font-bold text-white">--</p>
+                </div>
+                <div class="bg-slate-900/50 rounded-xl p-3 text-center">
+                  <p class="text-xs text-slate-500">Midnight Epochs in this Cardano Epoch</p>
+                  <p id="midnightEpochsInCardano" class="text-sm font-bold text-cyan-400">--</p>
+                </div>
+              </div>
+              <div class="bg-blue-500/5 border border-blue-500/10 rounded-xl p-4">
+                <div class="flex items-center gap-2 mb-2">
+                  <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                  <p class="text-xs text-blue-400 font-medium">Cross-Chain Anchor</p>
+                </div>
+                <p class="text-xs text-slate-400">Midnight checkpoints to Cardano every epoch for cross-chain security. Each Cardano epoch (~5 days) contains ~240 Midnight epochs.</p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -3119,55 +3151,41 @@ function loadEpochs(){
       else avgDurEl.textContent="--";
     }
 
-    // Epoch History Table
-    var historyEl=document.getElementById("epochHistoryTable");
-    if(historyEl&&epochs.length>0){
-      var html="";
-      epochs.slice(0,30).forEach(function(ep,i){
-        var epNum=ep.epoch||0;
-        var cardanoEp=ep.mainchain_epoch||"--";
-        var ts=ep.recorded_at||ep.timestamp||0;
-        var isFirst=(i===0);
+    // Epoch Relationship panels
+    if(epochs.length>0){
+      // Count epochs today (last 24h)
+      var now=Math.floor(Date.now()/1000);
+      var dayAgo=now-86400;
+      var epochsToday=epochs.filter(function(e){return (e.recorded_at||0)>=dayAgo}).length;
+      var blocksToday=epochsToday*50;
+      animateCounter(document.getElementById("epochsToday"),epochsToday);
+      animateCounter(document.getElementById("blocksToday"),blocksToday);
 
-        // Calculate duration from consecutive epochs
-        var durationStr="--";
-        if(i<epochs.length-1){
-          var nextTs=epochs[i+1].recorded_at||epochs[i+1].timestamp||0;
-          if(ts&&nextTs){
-            var durSec=ts-nextTs;
-            if(durSec>3600)durationStr=Math.floor(durSec/3600)+"h "+Math.round((durSec%3600)/60)+"m";
-            else if(durSec>60)durationStr=Math.round(durSec/60)+"m";
-            else if(durSec>0)durationStr=durSec+"s";
-          }
-        }
+      // Cardano epoch info
+      var cardanoEp=epochs[0].mainchain_epoch||"--";
+      document.getElementById("cardanoEpochBig").textContent=fmt(cardanoEp);
+      document.getElementById("cardanoSlotBig").textContent=fmt(epochs[0].mainchain_slot||"--");
+      // How many midnight epochs share this cardano epoch
+      var sameCardano=epochs.filter(function(e){return e.mainchain_epoch===cardanoEp}).length;
+      document.getElementById("midnightEpochsInCardano").textContent=sameCardano+"+ (in last "+epochs.length+" recorded)";
 
-        // Calculate approximate blocks from slot difference
-        var blocksStr="~50";
-        if(i<epochs.length-1){
-          var curSlot=ep.sidechain_slot||0;
-          var nextSlot=epochs[i+1].sidechain_slot||0;
-          if(curSlot&&nextSlot){
-            var slotDiff=curSlot-nextSlot;
-            blocksStr="~"+Math.round(slotDiff/6);
-          }
-        }
-
-        // Status badge
-        var statusBadge=isFirst
-          ?'<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/15 border border-green-500/30 text-green-400 text-xs font-medium"><span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> '+t("current")+'</span>'
-          :'<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-700/50 border border-slate-600/30 text-slate-400 text-xs">'+t("completed")+'</span>';
-
-        html+='<tr class="hover:bg-slate-800/30 transition'+(isFirst?' bg-cyan-500/5':'')+'">';
-        html+='<td class="px-4 py-3"><span class="text-cyan-400 font-bold text-sm">'+fmt(epNum)+'</span></td>';
-        html+='<td class="px-4 py-3 text-sm text-slate-300 font-mono">'+blocksStr+'</td>';
-        html+='<td class="px-4 py-3"><span class="text-blue-400 font-medium text-sm">'+fmt(cardanoEp)+'</span></td>';
-        html+='<td class="px-4 py-3 text-xs text-slate-400">'+timeAgo(ts)+'</td>';
-        html+='<td class="px-4 py-3 text-right">'+statusBadge+'</td>';
-        html+='</tr>';
-      });
-      historyEl.innerHTML=html;
-    }else if(historyEl){
-      historyEl.innerHTML='<tr><td colspan="5" class="px-4 py-8 text-center text-slate-500">No epoch data available</td></tr>';
+      // Recent epochs - compact list showing last 10
+      var listEl=document.getElementById("recentEpochsList");
+      if(listEl){
+        var html="";
+        epochs.slice(0,10).forEach(function(ep,i){
+          var isFirst=(i===0);
+          var ts=ep.recorded_at||0;
+          html+='<div class="flex items-center justify-between px-3 py-2 rounded-lg '+(isFirst?'bg-cyan-500/10 border border-cyan-500/20':'hover:bg-slate-800/30')+' transition">';
+          html+='<div class="flex items-center gap-3">';
+          html+='<span class="text-cyan-400 font-bold text-sm w-20">'+fmt(ep.epoch)+'</span>';
+          if(isFirst){html+='<span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>';}
+          html+='</div>';
+          html+='<span class="text-xs text-slate-400">'+timeAgo(ts)+'</span>';
+          html+='</div>';
+        });
+        listEl.innerHTML=html;
+      }
     }
 
     // Session Changes table
@@ -3191,8 +3209,8 @@ function loadEpochs(){
     }
   }).catch(function(e){
     console.log("Epochs data error:",e);
-    var hEl=document.getElementById("epochHistoryTable");
-    if(hEl)hEl.innerHTML='<tr><td colspan="5" class="px-4 py-8 text-center text-slate-500">No epoch data available</td></tr>';
+    var listEl=document.getElementById("recentEpochsList");
+    if(listEl)listEl.innerHTML='<p class="text-center text-slate-500 text-sm py-4">No epoch data available</p>';
     document.getElementById("epochSessionTable").innerHTML='<tr><td colspan="3" class="px-4 py-8 text-center text-slate-500">No data available</td></tr>';
   });
 
