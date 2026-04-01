@@ -1012,11 +1012,14 @@
         <!-- Current Epoch Banner -->
         <div class="glass rounded-2xl border border-cyan-500/30 p-8 mb-6 card-hover relative overflow-hidden">
           <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-purple-500/5 pointer-events-none"></div>
-          <div class="relative grid md:grid-cols-3 gap-8 items-center">
+          <div class="relative grid md:grid-cols-4 gap-6 items-center">
             <div class="text-center md:text-left">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="currentEpochInfo">Current Epoch</p>
               <p id="epochCurrentNum" class="text-5xl font-black text-cyan-400">--</p>
-              <p class="text-sm text-slate-400 mt-2"><span data-i18n="sidechainSlot">Sidechain Slot</span>: <span id="epochCurrentSlot" class="text-white font-mono">--</span></p>
+              <div class="flex flex-wrap gap-2 mt-3">
+                <span class="text-xs px-2 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300" data-i18n="thirtyMinEpochs">30 min epochs</span>
+                <span class="text-xs px-2 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300" data-i18n="blocksPerEpochValue">~50 blocks/epoch</span>
+              </div>
             </div>
             <div class="text-center">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="nextEpochIn">Next Epoch In</p>
@@ -1025,15 +1028,19 @@
                 <div id="epochProgressBar" class="h-full bg-gradient-to-r from-cyan-500 to-green-500 rounded-full transition-all duration-1000" style="width:0%"></div>
               </div>
             </div>
-            <div class="text-center md:text-right">
+            <div class="text-center">
               <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="cardanoEpoch">Cardano Epoch</p>
               <p id="epochCardanoNum" class="text-3xl font-bold text-blue-400">--</p>
+            </div>
+            <div class="text-center md:text-right">
+              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="sidechainSlot">Sidechain Slot</p>
+              <p id="epochCurrentSlot" class="text-2xl font-bold text-white font-mono">--</p>
             </div>
           </div>
         </div>
 
         <!-- Session Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div class="glass rounded-2xl border border-green-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-green-500/10 rounded-full blur-2xl"></div>
             <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalSessions">Total Sessions</p><p id="epochTotalSessions" class="text-2xl font-bold text-green-400 count-up">--</p></div>
@@ -1046,22 +1053,41 @@
             <div class="absolute top-0 right-0 w-20 h-20 bg-cyan-500/10 rounded-full blur-2xl"></div>
             <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="avgEpochDuration">Avg Epoch Duration</p><p id="epochAvgDuration" class="text-2xl font-bold text-cyan-400 count-up">--</p></div>
           </div>
+          <div class="glass rounded-2xl border border-purple-500/20 p-5 card-hover relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl"></div>
+            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="blocksPerEpoch">Blocks/Epoch</p><p id="epochBlocksPerEpoch" class="text-2xl font-bold text-purple-400 count-up">~50</p></div>
+          </div>
         </div>
 
-        <div class="grid lg:grid-cols-2 gap-6">
-          <!-- Epoch Timeline -->
-          <div class="glass rounded-2xl border border-slate-700/50 overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/30 to-purple-500/30 flex items-center justify-center"><span class="text-sm">⏱</span></div>
-                <div><h3 class="font-semibold text-white" data-i18n="epochTimeline">Epoch Timeline</h3><p class="text-xs text-slate-500">Recent epoch progression</p></div>
-              </div>
-            </div>
-            <div id="epochTimeline" class="p-6 epoch-timeline max-h-[500px] overflow-y-auto">
-              <div class="text-center text-slate-500 py-8">Loading epoch data...</div>
+        <!-- Epoch History Table -->
+        <div class="glass rounded-2xl border border-slate-700/50 overflow-hidden mb-6">
+          <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/30 to-purple-500/30 flex items-center justify-center"><span class="text-sm">⏱</span></div>
+              <div><h3 class="font-semibold text-white" data-i18n="epochHistory">Epoch History</h3><p class="text-xs text-slate-500">Recent epoch progression</p></div>
             </div>
           </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-slate-700/30">
+                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="epochs">Epoch</th>
+                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="cardanoEpoch">Cardano Epoch</th>
+                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="duration">Duration</th>
+                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase">Blocks</th>
+                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="started">Started</th>
+                  <th class="text-right px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="status">Status</th>
+                </tr>
+              </thead>
+              <tbody id="epochHistoryTable" class="divide-y divide-slate-700/20">
+                <tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">Loading epoch data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
+        <!-- Session Changes & Epoch Info -->
+        <div class="grid lg:grid-cols-2 gap-6">
           <!-- Session Changes -->
           <div class="glass rounded-2xl border border-slate-700/50 overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between">
@@ -1084,6 +1110,35 @@
                   <tr><td colspan="3" class="px-4 py-8 text-center text-slate-500">Loading...</td></tr>
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          <!-- Epoch Info Box -->
+          <div class="glass rounded-2xl border border-cyan-500/20 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-700/30 flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/30 to-blue-500/30 flex items-center justify-center"><span class="text-sm">💡</span></div>
+              <h3 class="font-semibold text-white">About Midnight Epochs</h3>
+            </div>
+            <div class="p-6">
+              <p class="text-sm text-slate-300 leading-relaxed" data-i18n="epochExplainer">Midnight uses 30-minute epochs. Each epoch produces ~50 blocks. The validator committee is set at the start of each epoch. Midnight epochs are anchored to Cardano epochs for cross-chain security.</p>
+              <div class="grid grid-cols-2 gap-4 mt-6">
+                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/30 text-center">
+                  <p class="text-2xl font-bold text-cyan-400">30m</p>
+                  <p class="text-xs text-slate-500 mt-1" data-i18n="duration">Duration</p>
+                </div>
+                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/30 text-center">
+                  <p class="text-2xl font-bold text-purple-400">~50</p>
+                  <p class="text-xs text-slate-500 mt-1">Blocks</p>
+                </div>
+                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/30 text-center">
+                  <p class="text-2xl font-bold text-green-400">300</p>
+                  <p class="text-xs text-slate-500 mt-1">Slots</p>
+                </div>
+                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/30 text-center">
+                  <p class="text-2xl font-bold text-blue-400">6s</p>
+                  <p class="text-xs text-slate-500 mt-1">Slot Time</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1296,7 +1351,17 @@ var translations = {
     nightforgeExplorer: "NightForge Explorer",
     ago: "ago", seconds: "s", minutes: "m", hours: "h", days: "d",
     networkAge: "Network Age", networkLive: "Mainnet Live",
-    dustTitle: "Powered by DUST", dustDesc: "Midnight uses a unique fee token called DUST. Generated from NIGHT tokens, DUST grows in value over time and is used exclusively for transaction fees. Unlike traditional gas, DUST cannot be transferred - only spent on fees."
+    dustTitle: "Powered by DUST", dustDesc: "Midnight uses a unique fee token called DUST. Generated from NIGHT tokens, DUST grows in value over time and is used exclusively for transaction fees. Unlike traditional gas, DUST cannot be transferred - only spent on fees.",
+    epochExplainer: "Midnight uses 30-minute epochs. Each epoch produces ~50 blocks. The validator committee is set at the start of each epoch. Midnight epochs are anchored to Cardano epochs for cross-chain security.",
+    blocksPerEpoch: "Blocks/Epoch",
+    completed: "Completed",
+    current: "Current",
+    duration: "Duration",
+    status: "Status",
+    epochHistory: "Epoch History",
+    thirtyMinEpochs: "30 min epochs",
+    blocksPerEpochValue: "~50 blocks/epoch",
+    started: "Started"
   },
   jp: {
     overview: "概要", blocks: "ブロック", extrinsics: "エクストリンシック",
@@ -1349,7 +1414,17 @@ var translations = {
     nightforgeExplorer: "NightForge エクスプローラー",
     ago: "前", seconds: "秒", minutes: "分", hours: "時間", days: "日",
     networkAge: "ネットワーク稼働期間", networkLive: "メインネット稼働中",
-    dustTitle: "DUSTで駆動", dustDesc: "MidnightはDUSTという独自の手数料トークンを使用します。NIGHTトークンから生成されるDUSTは時間とともに価値が成長し、取引手数料の支払い専用です。従来のガスとは異なり、DUSTは譲渡不可で手数料にのみ使用されます。"
+    dustTitle: "DUSTで駆動", dustDesc: "MidnightはDUSTという独自の手数料トークンを使用します。NIGHTトークンから生成されるDUSTは時間とともに価値が成長し、取引手数料の支払い専用です。従来のガスとは異なり、DUSTは譲渡不可で手数料にのみ使用されます。",
+    epochExplainer: "Midnightは30分のエポックを使用します。各エポックで約50ブロックが生成されます。バリデータ委員会は各エポックの開始時に設定されます。Midnightのエポックはクロスチェーンセキュリティのためにカルダノエポックにアンカーされています。",
+    blocksPerEpoch: "ブロック/エポック",
+    completed: "完了",
+    current: "現在",
+    duration: "期間",
+    status: "ステータス",
+    epochHistory: "エポック履歴",
+    thirtyMinEpochs: "30分エポック",
+    blocksPerEpochValue: "~50ブロック/エポック",
+    started: "開始"
   }
 };
 
@@ -3036,38 +3111,65 @@ function loadEpochs(){
     animateCounter(document.getElementById("epochAuthorityChanges"),stats.totalAuthorityChanges||0);
     var avgDurEl=document.getElementById("epochAvgDuration");
     if(avgDurEl){
-      var avgSec=stats.avgEpochDuration||0;
+      // avgEpochDuration is in MILLISECONDS - divide by 1000 for seconds
+      var avgMs=stats.avgEpochDuration||0;
+      var avgSec=avgMs/1000;
       if(avgSec>3600)avgDurEl.textContent=Math.round(avgSec/3600)+"h "+Math.round((avgSec%3600)/60)+"m";
       else if(avgSec>60)avgDurEl.textContent=Math.round(avgSec/60)+"m "+Math.round(avgSec%60)+"s";
       else if(avgSec>0)avgDurEl.textContent=Math.round(avgSec)+"s";
       else avgDurEl.textContent="--";
     }
 
-    // Epoch Timeline
-    var timelineEl=document.getElementById("epochTimeline");
-    if(timelineEl&&epochs.length>0){
+    // Epoch History Table
+    var historyEl=document.getElementById("epochHistoryTable");
+    if(historyEl&&epochs.length>0){
       var html="";
       epochs.slice(0,30).forEach(function(ep,i){
         var epNum=ep.epoch||0;
-        var scSlot=ep.sidechain_slot||"--";
         var cardanoEp=ep.mainchain_epoch||"--";
         var ts=ep.recorded_at||ep.timestamp||0;
-        html+='<div class="epoch-node">';
-        html+='<div class="bg-slate-800/50 rounded-xl border border-slate-700/30 p-4 hover:border-cyan-500/30 transition card-hover">';
-        html+='<div class="flex items-center justify-between mb-2">';
-        html+='<span class="text-lg font-bold text-cyan-400">Epoch '+fmt(epNum)+'</span>';
-        html+='<span class="text-xs text-slate-500">'+timeAgo(ts)+'</span>';
-        html+='</div>';
-        html+='<div class="grid grid-cols-2 gap-2 text-xs">';
-        html+='<div><span class="text-slate-500">SC Slot</span><p class="font-mono text-white">'+fmt(scSlot)+'</p></div>';
-        html+='<div><span class="text-slate-500">Cardano Epoch</span><p class="font-mono text-blue-400">'+fmt(cardanoEp)+'</p></div>';
-        html+='</div>';
-        if(ts){html+='<p class="text-[10px] text-slate-600 mt-2">'+formatTime(ts)+'</p>';}
-        html+='</div></div>';
+        var isFirst=(i===0);
+
+        // Calculate duration from consecutive epochs
+        var durationStr="--";
+        if(i<epochs.length-1){
+          var nextTs=epochs[i+1].recorded_at||epochs[i+1].timestamp||0;
+          if(ts&&nextTs){
+            var durSec=ts-nextTs;
+            if(durSec>3600)durationStr=Math.floor(durSec/3600)+"h "+Math.round((durSec%3600)/60)+"m";
+            else if(durSec>60)durationStr=Math.round(durSec/60)+"m";
+            else if(durSec>0)durationStr=durSec+"s";
+          }
+        }
+
+        // Calculate approximate blocks from slot difference
+        var blocksStr="~50";
+        if(i<epochs.length-1){
+          var curSlot=ep.sidechain_slot||0;
+          var nextSlot=epochs[i+1].sidechain_slot||0;
+          if(curSlot&&nextSlot){
+            var slotDiff=curSlot-nextSlot;
+            blocksStr="~"+Math.round(slotDiff/6);
+          }
+        }
+
+        // Status badge
+        var statusBadge=isFirst
+          ?'<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/15 border border-green-500/30 text-green-400 text-xs font-medium"><span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> '+t("current")+'</span>'
+          :'<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-700/50 border border-slate-600/30 text-slate-400 text-xs">'+t("completed")+'</span>';
+
+        html+='<tr class="hover:bg-slate-800/30 transition'+(isFirst?' bg-cyan-500/5':'')+'">';
+        html+='<td class="px-4 py-3"><span class="text-cyan-400 font-bold text-sm">'+fmt(epNum)+'</span></td>';
+        html+='<td class="px-4 py-3"><span class="text-blue-400 font-medium text-sm">'+fmt(cardanoEp)+'</span></td>';
+        html+='<td class="px-4 py-3 text-sm text-slate-300">'+durationStr+'</td>';
+        html+='<td class="px-4 py-3 text-sm text-slate-300 font-mono">'+blocksStr+'</td>';
+        html+='<td class="px-4 py-3 text-xs text-slate-400">'+timeAgo(ts)+'</td>';
+        html+='<td class="px-4 py-3 text-right">'+statusBadge+'</td>';
+        html+='</tr>';
       });
-      timelineEl.innerHTML=html;
-    }else if(timelineEl){
-      timelineEl.innerHTML='<div class="text-center text-slate-500 py-8">No epoch data available</div>';
+      historyEl.innerHTML=html;
+    }else if(historyEl){
+      historyEl.innerHTML='<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">No epoch data available</td></tr>';
     }
 
     // Session Changes table
@@ -3091,7 +3193,8 @@ function loadEpochs(){
     }
   }).catch(function(e){
     console.log("Epochs data error:",e);
-    document.getElementById("epochTimeline").innerHTML='<div class="text-center text-slate-500 py-8">No epoch data available</div>';
+    var hEl=document.getElementById("epochHistoryTable");
+    if(hEl)hEl.innerHTML='<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">No epoch data available</td></tr>';
     document.getElementById("epochSessionTable").innerHTML='<tr><td colspan="3" class="px-4 py-8 text-center text-slate-500">No data available</td></tr>';
   });
 
