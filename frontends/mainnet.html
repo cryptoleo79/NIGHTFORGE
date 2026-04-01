@@ -1071,10 +1071,10 @@
             <table class="w-full text-sm">
               <thead>
                 <tr class="border-b border-slate-700/30">
-                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="epochs">Epoch</th>
-                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="cardanoEpoch">Cardano Epoch</th>
+                  <th class="text-left px-4 py-3 text-xs text-cyan-400 uppercase">Midnight Epoch</th>
                   <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="duration">Duration</th>
                   <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase">Blocks</th>
+                  <th class="text-left px-4 py-3 text-xs text-blue-400 uppercase">Cardano Epoch</th>
                   <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="started">Started</th>
                   <th class="text-right px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="status">Status</th>
                 </tr>
@@ -3160,9 +3160,9 @@ function loadEpochs(){
 
         html+='<tr class="hover:bg-slate-800/30 transition'+(isFirst?' bg-cyan-500/5':'')+'">';
         html+='<td class="px-4 py-3"><span class="text-cyan-400 font-bold text-sm">'+fmt(epNum)+'</span></td>';
-        html+='<td class="px-4 py-3"><span class="text-blue-400 font-medium text-sm">'+fmt(cardanoEp)+'</span></td>';
         html+='<td class="px-4 py-3 text-sm text-slate-300">'+durationStr+'</td>';
         html+='<td class="px-4 py-3 text-sm text-slate-300 font-mono">'+blocksStr+'</td>';
+        html+='<td class="px-4 py-3"><span class="text-blue-400 font-medium text-sm">'+fmt(cardanoEp)+'</span><span class="text-[10px] text-slate-600 ml-1">(~5d)</span></td>';
         html+='<td class="px-4 py-3 text-xs text-slate-400">'+timeAgo(ts)+'</td>';
         html+='<td class="px-4 py-3 text-right">'+statusBadge+'</td>';
         html+='</tr>';
