@@ -32,7 +32,7 @@ import { decodeMidnightTransaction, classifyMidnightTx } from '../midnight-decod
 
 const app = express();
 
-app.use(cors({ origin: config.api.corsOrigins }));
+app.use(cors({ origin: true }));
 app.use(express.json());
 
 // Rewrite non-API paths to /api/ prefix for nginx proxy compatibility

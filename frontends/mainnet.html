@@ -19,7 +19,7 @@
     * { font-family: 'Inter', sans-serif; }
     .mono { font-family: 'JetBrains Mono', monospace; }
     @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-    .animate-marquee { animation: marquee 25s linear infinite; }
+    .animate-marquee { animation: marquee 30s linear infinite; will-change: transform; transition: opacity 0.3s ease; }
     @keyframes sakura-fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 0; } 10% { opacity: 0.6; } 70% { opacity: 0.4; } 100% { transform: translateY(90vh) rotate(360deg); opacity: 0; } }
     .sakura { position: fixed; top: 0; pointer-events: none; z-index: 1; animation: sakura-fall linear forwards; }
     @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 5px rgba(6,182,212,0.3); } 50% { box-shadow: 0 0 20px rgba(6,182,212,0.6); } }
@@ -915,29 +915,27 @@
                 <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span id="cmpMainTPS" class="text-sm font-medium text-white">--</span></div>
               </div>
             </div>
-            <div class="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-5 opacity-60">
+            <div class="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-5">
               <div class="flex items-center gap-2 mb-4">
                 <div class="w-3 h-3 rounded-full bg-orange-400"></div>
-                <span class="font-bold text-orange-400">Preprod</span>
+                <a href="https://preprod.nightforge.jp" class="font-bold text-orange-400 hover:underline">Preprod</a>
               </div>
               <div class="space-y-2">
-                <div class="flex justify-between"><span class="text-xs text-slate-500">Blocks</span><span class="text-sm font-medium text-slate-500">--</span></div>
-                <div class="flex justify-between"><span class="text-xs text-slate-500">Extrinsics</span><span class="text-sm font-medium text-slate-500">--</span></div>
-                <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span class="text-sm font-medium text-slate-500">--</span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">Blocks</span><span id="cmpPreprodBlocks" class="text-sm font-medium text-white">--</span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">Extrinsics</span><span id="cmpPreprodExts" class="text-sm font-medium text-white">--</span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span id="cmpPreprodTPS" class="text-sm font-medium text-white">--</span></div>
               </div>
-              <p class="text-xs text-slate-600 mt-3 text-center">Coming soon</p>
             </div>
-            <div class="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5 opacity-60">
+            <div class="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5">
               <div class="flex items-center gap-2 mb-4">
                 <div class="w-3 h-3 rounded-full bg-cyan-400"></div>
-                <span class="font-bold text-cyan-400">Preview</span>
+                <a href="https://preview.nightforge.jp" class="font-bold text-cyan-400 hover:underline">Preview</a>
               </div>
               <div class="space-y-2">
-                <div class="flex justify-between"><span class="text-xs text-slate-500">Blocks</span><span class="text-sm font-medium text-slate-500">--</span></div>
-                <div class="flex justify-between"><span class="text-xs text-slate-500">Extrinsics</span><span class="text-sm font-medium text-slate-500">--</span></div>
-                <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span class="text-sm font-medium text-slate-500">--</span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">Blocks</span><span id="cmpPreviewBlocks" class="text-sm font-medium text-white">--</span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">Extrinsics</span><span id="cmpPreviewExts" class="text-sm font-medium text-white">--</span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span id="cmpPreviewTPS" class="text-sm font-medium text-white">--</span></div>
               </div>
-              <p class="text-xs text-slate-600 mt-3 text-center">Coming soon</p>
             </div>
           </div>
         </div>
@@ -2464,9 +2462,15 @@ function renderTicker(d){
   }
   var ticker=document.getElementById("txTicker");
   var newHtml=html+html;
-  if(ticker.dataset.hash!==html.substring(0,100)){
-    ticker.dataset.hash=html.substring(0,100);
-    ticker.innerHTML=newHtml;
+  var hashKey=html.substring(0,100);
+  if(ticker.dataset.hash!==hashKey){
+    ticker.dataset.hash=hashKey;
+    // Fade out, swap content, fade back in - avoids jarring restart
+    ticker.style.opacity="0";
+    setTimeout(function(){
+      ticker.innerHTML=newHtml;
+      ticker.style.opacity="1";
+    },300);
   }
   document.querySelectorAll(".ticker-item").forEach(function(el){el.addEventListener("click",function(){cameFromBlock=null;viewExtDetail(el.dataset.hash,parseInt(el.dataset.bh),el.dataset.sec,el.dataset.meth,el.dataset.ts)})});
 }
@@ -3181,6 +3185,17 @@ function loadAnalyticsDash(){
     document.getElementById("cmpMainBlocks").textContent=fmt(data.blocks||0);
     document.getElementById("cmpMainExts").textContent=fmt(data.extrinsics||0);
     document.getElementById("cmpMainTPS").textContent=(data.tps||0).toFixed(3);
+    // Fetch preprod and preview stats
+    fetch("https://preprod.nightforge.jp/api/preprod/stats").then(function(r){return r.json()}).then(function(s){
+      document.getElementById("cmpPreprodBlocks").textContent=fmt(s.totalBlocks||s.blocks||0);
+      document.getElementById("cmpPreprodExts").textContent=fmt(s.totalExtrinsics||s.extrinsics||0);
+      document.getElementById("cmpPreprodTPS").textContent=(s.tps||0.5).toFixed?((s.tps||0).toFixed(3)):"0.500";
+    }).catch(function(){});
+    fetch("https://preview.nightforge.jp/api/preview/stats").then(function(r){return r.json()}).then(function(s){
+      document.getElementById("cmpPreviewBlocks").textContent=fmt(s.totalBlocks||s.blocks||0);
+      document.getElementById("cmpPreviewExts").textContent=fmt(s.totalExtrinsics||s.extrinsics||0);
+      document.getElementById("cmpPreviewTPS").textContent=(s.tps||0.5).toFixed?((s.tps||0).toFixed(3)):"0.500";
+    }).catch(function(){});
   }).catch(function(e){
     console.log("Analytics overview error:",e);
     // Fallback to stats API
@@ -3191,7 +3206,17 @@ function loadAnalyticsDash(){
       document.getElementById("anTPS").textContent="0.50";
       document.getElementById("cmpMainBlocks").textContent=fmt(s.totalBlocks||0);
       document.getElementById("cmpMainExts").textContent=fmt(s.totalExtrinsics||0);
-      document.getElementById("cmpMainTPS").textContent="0.50";
+      document.getElementById("cmpMainTPS").textContent="0.500";
+      fetch("https://preprod.nightforge.jp/api/preprod/stats").then(function(r){return r.json()}).then(function(ps){
+        document.getElementById("cmpPreprodBlocks").textContent=fmt(ps.totalBlocks||0);
+        document.getElementById("cmpPreprodExts").textContent=fmt(ps.totalExtrinsics||0);
+        document.getElementById("cmpPreprodTPS").textContent=(ps.tps||0).toFixed(3);
+      }).catch(function(){});
+      fetch("https://preview.nightforge.jp/api/preview/stats").then(function(r){return r.json()}).then(function(ps){
+        document.getElementById("cmpPreviewBlocks").textContent=fmt(ps.totalBlocks||0);
+        document.getElementById("cmpPreviewExts").textContent=fmt(ps.totalExtrinsics||0);
+        document.getElementById("cmpPreviewTPS").textContent=(ps.tps||0).toFixed(3);
+      }).catch(function(){});
     }).catch(function(){});
   });
 
