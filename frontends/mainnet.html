@@ -55,6 +55,32 @@
 .glow-border::before{content:'';position:absolute;inset:-1px;background:linear-gradient(135deg,#f97316,#ec4899,#8b5cf6);border-radius:inherit;z-index:-1;opacity:0;transition:opacity 0.3s}
 .glow-border:hover::before{opacity:0.5}
 
+/* Mobile Responsive Fixes */
+#tabNav { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+#tabNav::-webkit-scrollbar { display: none; }
+.tab-btn { white-space: nowrap; flex-shrink: 0; }
+
+@media (max-width: 640px) {
+  .text-3xl { font-size: 1.5rem; }
+  .text-4xl { font-size: 1.875rem; }
+  .text-2xl { font-size: 1.25rem; }
+  .text-xl { font-size: 1.125rem; }
+  .bridge-viz-container .w-16 { width: 3rem; height: 3rem; }
+  .bridge-viz-container .w-16 .text-2xl { font-size: 1.25rem; }
+  .bridge-viz-container .mx-8 { margin-left: 1rem; margin-right: 1rem; }
+  #searchContainer .max-w-3xl { max-width: 100%; }
+  #searchContainer .relative.flex.gap-2 { flex-wrap: wrap; }
+  #searchContainer #filterBtn { width: 100%; justify-content: center; }
+  #searchContainer .relative.flex-1 { width: 100%; flex-basis: 100%; }
+  header .text-lg { font-size: 0.875rem; }
+  header .gap-4 { gap: 0.5rem; }
+  .grid.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 480px) {
+  .grid.grid-cols-2 { grid-template-columns: 1fr; }
+}
+
 </style>
 
 
@@ -627,7 +653,7 @@
         </div>
 
         <!-- Bridge Animation Graphic -->
-        <div class="glass rounded-2xl border border-purple-500/20 p-6 mb-6 card-hover">
+        <div class="glass rounded-2xl border border-purple-500/20 p-6 mb-6 card-hover bridge-viz-container">
           <div class="flex items-center justify-between max-w-2xl mx-auto">
             <div class="flex flex-col items-center gap-2">
               <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/30 to-blue-600/20 border border-blue-500/30 flex items-center justify-center">
@@ -912,6 +938,29 @@
                 <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span class="text-sm font-medium text-slate-500">--</span></div>
               </div>
               <p class="text-xs text-slate-600 mt-3 text-center">Coming soon</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- DUST Fee Tracker -->
+        <div class="glass rounded-2xl border border-amber-500/20 overflow-hidden mb-6 mt-6">
+          <div class="px-6 py-4 border-b border-slate-700/30 bg-gradient-to-r from-amber-500/5 to-transparent">
+            <h3 class="font-semibold text-amber-400" data-i18n="dustTracker">DUST Fee Tracker</h3>
+            <p class="text-xs text-slate-500">Network fee consumption over time</p>
+          </div>
+          <div class="p-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div class="bg-slate-900/50 rounded-xl p-3 text-center">
+                <p class="text-xs text-slate-500">Total Fee-Paying Txs</p>
+                <p id="dustTotalTxs" class="text-2xl font-bold text-amber-400">--</p>
+              </div>
+              <div class="bg-slate-900/50 rounded-xl p-3 text-center">
+                <p class="text-xs text-slate-500">DUST Events</p>
+                <p id="dustEventCount" class="text-2xl font-bold text-amber-400">--</p>
+              </div>
+            </div>
+            <div class="h-48">
+              <canvas id="dustChartCanvas"></canvas>
             </div>
           </div>
         </div>
@@ -1422,7 +1471,7 @@ var translations = {
     registrations: "Registrations", deregistrations: "Deregistrations",
     mappingsAdded: "Mappings Added",
     loading: "Loading...", noData: "No data available",
-    search: "Search by Hash / Height / Contract Address...",
+    search: "Search by Hash / Height / Address...",
     connected: "CONNECTED", live: "LIVE", indexed: "INDEXED",
     nightforgeExplorer: "NightForge Explorer",
     ago: "ago", seconds: "s", minutes: "m", hours: "h", days: "d",
@@ -1442,7 +1491,25 @@ var translations = {
     nightTokenDesc: "NIGHT is Midnight's native utility token distributed via the Glacier Drop program. NIGHT generates DUST (fee resource) over time - like solar panels generating electricity. Hold NIGHT to power transactions without volatile gas fees.",
     networkHealth: "Network Health",
     builtInJapan: "\uD83C\uDDEF\uD83C\uDDF5 Built in Japan",
-    blockProducers: "Block Producers"
+    blockProducers: "Block Producers",
+    dustTracker: "DUST Fee Tracker",
+    addressLookup: "Address Lookup",
+    address: "Address",
+    copy: "Copy",
+    transactionCount: "Transactions",
+    firstSeen: "First Seen",
+    lastSeen: "Last Seen",
+    addressTransactions: "Transactions",
+    addressEvents: "Related Events",
+    blocksProducedShort: "blks",
+    enrichedData: "Indexer Data",
+    enrichedLoading: "Loading enriched data from official indexer...",
+    blockAuthor: "Block Author",
+    contractActions: "Contract Actions",
+    unshieldedOutputs: "Unshielded Outputs",
+    unshieldedInputs: "Unshielded Inputs",
+    zswapEvents: "ZSwap Events",
+    dustEvents: "DUST Events"
   },
   jp: {
     overview: "概要", blocks: "ブロック", extrinsics: "エクストリンシック",
@@ -1490,7 +1557,7 @@ var translations = {
     registrations: "登録", deregistrations: "登録解除",
     mappingsAdded: "マッピング追加",
     loading: "読み込み中...", noData: "データなし",
-    search: "ブロック高さまたはハッシュで検索...",
+    search: "ハッシュ / ブロック高さ / アドレスで検索...",
     connected: "接続済", live: "ライブ", indexed: "インデックス済",
     nightforgeExplorer: "NightForge エクスプローラー",
     ago: "前", seconds: "秒", minutes: "分", hours: "時間", days: "日",
@@ -1510,7 +1577,25 @@ var translations = {
     nightTokenDesc: "NIGHTはGlacier Dropプログラムで配布されたMidnightのネイティブユーティリティトークンです。NIGHTは時間の経過とともにDUST（手数料リソース）を生成します。NIGHTを保有することで、変動するガス代なしでトランザクションを実行できます。",
     networkHealth: "ネットワーク健全性",
     builtInJapan: "\uD83C\uDDEF\uD83C\uDDF5 日本製",
-    blockProducers: "ブロック生成者"
+    blockProducers: "ブロック生成者",
+    dustTracker: "DUST手数料トラッカー",
+    addressLookup: "アドレス検索",
+    address: "アドレス",
+    copy: "コピー",
+    transactionCount: "取引数",
+    firstSeen: "初回確認",
+    lastSeen: "最終確認",
+    addressTransactions: "取引一覧",
+    addressEvents: "関連イベント",
+    blocksProducedShort: "ブロック",
+    enrichedData: "インデクサーデータ",
+    enrichedLoading: "公式インデクサーからデータを取得中...",
+    blockAuthor: "ブロック生成者",
+    contractActions: "コントラクトアクション",
+    unshieldedOutputs: "アンシールド出力",
+    unshieldedInputs: "アンシールド入力",
+    zswapEvents: "ZSwapイベント",
+    dustEvents: "DUSTイベント"
   }
 };
 
@@ -1703,6 +1788,18 @@ function doSearch(){
   var q=document.getElementById("searchInput").value.trim();
   if(!q)return;
   if(/^\d+$/.test(q)){clickBlock(parseInt(q))}
+  else if(/^0x[0-9a-fA-F]{20,}$/.test(q)||/^[0-9a-fA-F]{40,}$/.test(q)){
+    // Looks like an address - try address lookup first, fall back to tx hash
+    fetch(API+"/address/"+encodeURIComponent(q)).then(function(r){
+      if(r.ok)return r.json();
+      throw new Error("not found");
+    }).then(function(data){
+      viewAddressDetail(data);
+    }).catch(function(){
+      // Fall back to extrinsic hash search
+      viewTxByHash(q);
+    });
+  }
   else{viewTxByHash(q)}
 }
 
@@ -1757,6 +1854,84 @@ function renderContract(ct){
 
 function clickBlock(h){fetch(API+"/block/"+h).then(function(r){return r.json()}).then(function(b){if(b){viewBlock(b);(document.getElementById("deepLoader")||{style:{}}).style.display="none";(document.getElementById("mainView")||{style:{}}).style.display="block";}}).catch(function(){(document.getElementById("deepLoader")||{style:{}}).style.display="none";(document.getElementById("mainView")||{style:{}}).style.display="block";})}
 function viewTxByHash(hash){fetch(API+"/extrinsic/"+(hash.startsWith("0x")?hash.slice(2):hash)).then(function(r){return r.json()}).then(function(tx){if(tx)viewTxDetail(tx)}).catch(function(){})}
+
+function viewAddressDetail(data){
+  if(!isPopState)history.pushState(null,"","/address/"+data.address);
+  var txsHtml="";
+  if(data.transactions&&data.transactions.length>0){
+    txsHtml='<div class="space-y-2">';
+    for(var i=0;i<data.transactions.length;i++){
+      var tx=data.transactions[i];
+      var c=getColor(tx.section);
+      txsHtml+='<div class="flex items-center justify-between p-3 bg-slate-900/50 rounded-xl hover:bg-purple-500/10 cursor-pointer border border-slate-700/20 ext-row" data-hash="'+tx.hash+'" data-bh="'+tx.block_height+'" data-sec="'+tx.section+'" data-meth="'+tx.method+'" data-ts="'+tx.timestamp+'">'
+        +'<div class="flex items-center gap-3">'
+        +'<div class="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>'
+        +'<div><p class="font-mono text-white text-sm">'+truncHash(tx.hash,8)+'</p>'
+        +'<p class="text-xs text-slate-500">'+timeAgo(tx.timestamp)+'</p></div></div>'
+        +'<div class="flex items-center gap-3">'
+        +'<span class="px-2 py-1 text-xs rounded '+c.bg+' '+c.t+' border '+c.b+'">'+(methodLabels[tx.section+"."+tx.method]||tx.section+"."+tx.method)+'</span>'
+        +'<span class="text-xs text-slate-500 font-mono">#'+fmt(tx.block_height)+'</span>'
+        +'</div></div>';
+    }
+    txsHtml+='</div>';
+  } else {
+    txsHtml='<p class="text-slate-500 text-sm">'+t("noData")+'</p>';
+  }
+
+  var evtsHtml="";
+  if(data.events&&data.events.length>0){
+    evtsHtml='<div class="space-y-2">';
+    for(var i=0;i<data.events.length;i++){
+      var ev=data.events[i];
+      evtsHtml+='<div class="flex items-center justify-between p-3 bg-slate-900/50 rounded-xl border border-slate-700/20">'
+        +'<div class="flex items-center gap-3">'
+        +'<div class="w-8 h-8 bg-cyan-500/20 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg></div>'
+        +'<div><p class="text-sm text-white">'+ev.section+'.'+ev.method+'</p>'
+        +'<p class="text-xs text-slate-500">'+timeAgo(ev.timestamp)+'</p></div></div>'
+        +'<span class="text-xs text-slate-500 font-mono">#'+fmt(ev.block_height)+'</span>'
+        +'</div>';
+    }
+    evtsHtml+='</div>';
+  } else {
+    evtsHtml='<p class="text-slate-500 text-sm">'+t("noData")+'</p>';
+  }
+
+  var html='<div class="space-y-6">'
+    +'<div class="flex items-center gap-4 mb-2">'
+    +'<button onclick="goBackSmart()" class="p-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 transition"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>'
+    +'<h2 class="text-xl font-bold text-white">'+t("addressLookup")+'</h2>'
+    +'</div>'
+    +'<div class="bg-gradient-to-br from-orange-500/5 to-slate-900/60 rounded-2xl border border-orange-500/20 p-6">'
+    +'<div class="flex items-center justify-between mb-4">'
+    +'<h3 class="font-semibold text-orange-400">'+t("address")+'</h3>'
+    +'<button onclick="navigator.clipboard.writeText(\''+data.address+'\')" class="px-3 py-1 text-xs rounded-lg bg-slate-700/50 hover:bg-slate-600/50 border border-slate-600 text-slate-300 transition flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>'+t("copy")+'</button>'
+    +'</div>'
+    +'<p class="font-mono text-sm text-orange-300 break-all bg-slate-900/50 p-3 rounded-xl border border-orange-500/10">'+data.address+'</p>'
+    +'<div class="grid grid-cols-3 gap-4 mt-4">'
+    +'<div class="bg-slate-900/50 rounded-xl p-3 border border-slate-700/30"><p class="text-xs text-slate-500">'+t("transactionCount")+'</p><p class="text-lg font-bold text-white">'+fmt(data.transactionCount)+'</p></div>'
+    +'<div class="bg-slate-900/50 rounded-xl p-3 border border-slate-700/30"><p class="text-xs text-slate-500">'+t("firstSeen")+'</p><p class="text-sm font-mono text-white">'+(data.firstSeen?"#"+fmt(data.firstSeen):"--")+'</p></div>'
+    +'<div class="bg-slate-900/50 rounded-xl p-3 border border-slate-700/30"><p class="text-xs text-slate-500">'+t("lastSeen")+'</p><p class="text-sm font-mono text-white">'+(data.lastSeen?"#"+fmt(data.lastSeen):"--")+'</p></div>'
+    +'</div></div>'
+    +'<div class="bg-gradient-to-br from-purple-500/5 to-slate-900/60 rounded-2xl border border-purple-500/20 p-6">'
+    +'<h3 class="font-semibold text-white mb-4 flex items-center gap-2"><svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>'+t("addressTransactions")+' ('+data.transactions.length+')</h3>'
+    +txsHtml+'</div>'
+    +'<div class="bg-gradient-to-br from-cyan-500/5 to-slate-900/60 rounded-2xl border border-cyan-500/20 p-6">'
+    +'<h3 class="font-semibold text-white mb-4 flex items-center gap-2"><svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>'+t("addressEvents")+' ('+data.events.length+')</h3>'
+    +evtsHtml+'</div>'
+    +'</div>';
+  showDetail(html);
+  // Attach click handlers for ext-rows within the detail view
+  document.querySelectorAll("#detailView .ext-row").forEach(function(row){
+    row.addEventListener("click",function(){
+      var h=row.getAttribute("data-hash");
+      var bh=row.getAttribute("data-bh");
+      var sec=row.getAttribute("data-sec");
+      var meth=row.getAttribute("data-meth");
+      var ts=row.getAttribute("data-ts");
+      if(h)viewExtDetail(h,parseInt(bh),sec,meth,parseInt(ts));
+    });
+  });
+}
 
 function viewBlock(b){
   prevPage=location.pathname;if(!isPopState)history.pushState(null,"","/block/"+b.height);
@@ -1870,6 +2045,63 @@ function viewTxDetail(tx){
   document.getElementById("backToBlock").addEventListener("click",function(){clickBlock(parseInt(this.dataset.bh))});
   document.querySelectorAll(".block-link").forEach(function(el){el.addEventListener("click",function(){clickBlock(parseInt(el.dataset.bh))})});
   document.querySelectorAll(".raw-toggle").forEach(function(btn){btn.addEventListener("click",function(){var content=this.nextElementSibling;var arrow=this.querySelector(".toggle-arrow");content.classList.toggle("hidden");arrow.classList.toggle("rotate-180")})});
+
+  // Fetch enriched data from official indexer
+  if(tx.section==="midnight"||tx.is_midnight_tx){
+    var enrichedContainer=document.createElement("div");
+    enrichedContainer.id="enrichedTxData";
+    enrichedContainer.innerHTML='<div class="bg-slate-800/60 rounded-2xl border border-cyan-500/20 p-6 mt-6"><div class="flex items-center gap-2 mb-4"><div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div><span class="text-sm text-cyan-400">'+t("enrichedLoading")+'</span></div></div>';
+    var detailEl=document.getElementById("detail");
+    if(detailEl){var innerDiv=detailEl.querySelector(".space-y-6");if(innerDiv)innerDiv.appendChild(enrichedContainer);}
+    fetch(API+"/tx-enriched/"+tx.hash).then(function(r){return r.json()}).then(function(ed){
+      if(!ed||!ed.enriched){enrichedContainer.innerHTML='';return;}
+      var e=ed.enriched;
+      var html='<div class="bg-slate-800/60 rounded-2xl border border-cyan-500/20 p-6"><div class="flex items-center gap-2 mb-4"><svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><h3 class="text-lg font-bold text-white">'+t("enrichedData")+'</h3></div>';
+      // Block author
+      if(e.block&&e.block.author){
+        var authorLabel=ed.authorName||truncHash(e.block.author,14);
+        html+='<div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30 mb-4"><div class="flex justify-between items-center"><span class="text-slate-400 text-sm">'+t("blockAuthor")+'</span><span class="text-green-400 font-semibold text-sm">'+authorLabel+'</span></div>';
+        if(ed.authorName){html+='<p class="text-xs font-mono text-slate-500 mt-1">'+truncHash(e.block.author,20)+'</p>';}
+        html+='</div>';
+      }
+      // Contract actions
+      if(e.contractActions&&e.contractActions.length>0){
+        html+='<div class="bg-slate-900/50 rounded-xl p-4 border border-purple-500/20 mb-4"><p class="text-xs text-slate-500 uppercase mb-2">'+t("contractActions")+' ('+e.contractActions.length+')</p>';
+        for(var ci=0;ci<Math.min(e.contractActions.length,10);ci++){
+          var ca=e.contractActions[ci];
+          html+='<div class="flex items-center justify-between py-1 border-b border-slate-700/20 last:border-0"><code class="text-purple-400 font-mono text-xs break-all">'+truncHash(ca.address||"",16)+'</code><span class="text-[10px] text-slate-400">'+((ca.__typename||"").replace("ContractAction",""))+'</span></div>';
+        }
+        html+='</div>';
+      }
+      // Unshielded outputs
+      if(e.unshieldedCreatedOutputs&&e.unshieldedCreatedOutputs.length>0){
+        html+='<div class="bg-slate-900/50 rounded-xl p-4 border border-green-500/20 mb-4"><p class="text-xs text-slate-500 uppercase mb-2">'+t("unshieldedOutputs")+' ('+e.unshieldedCreatedOutputs.length+')</p>';
+        for(var oi=0;oi<e.unshieldedCreatedOutputs.length;oi++){
+          html+='<div class="flex items-center justify-between py-1"><span class="text-xs text-slate-400">#'+oi+'</span><span class="text-green-400 font-mono text-sm">'+e.unshieldedCreatedOutputs[oi].value+'</span></div>';
+        }
+        html+='</div>';
+      }
+      // Unshielded inputs
+      if(e.unshieldedSpentOutputs&&e.unshieldedSpentOutputs.length>0){
+        html+='<div class="bg-slate-900/50 rounded-xl p-4 border border-pink-500/20 mb-4"><p class="text-xs text-slate-500 uppercase mb-2">'+t("unshieldedInputs")+' ('+e.unshieldedSpentOutputs.length+')</p>';
+        for(var si=0;si<e.unshieldedSpentOutputs.length;si++){
+          html+='<div class="flex items-center justify-between py-1"><span class="text-xs text-slate-400">#'+si+'</span><span class="text-pink-400 font-mono text-sm">'+e.unshieldedSpentOutputs[si].value+'</span></div>';
+        }
+        html+='</div>';
+      }
+      // Event counts
+      var zswapCount=(e.zswapLedgerEvents||[]).length;
+      var dustCount=(e.dustLedgerEvents||[]).length;
+      if(zswapCount>0||dustCount>0){
+        html+='<div class="grid grid-cols-2 gap-4 mb-4">';
+        if(zswapCount>0){html+='<div class="bg-slate-900/50 rounded-xl p-4 border border-cyan-500/20 text-center"><p class="text-xs text-slate-500 uppercase mb-1">'+t("zswapEvents")+'</p><p class="text-2xl font-bold text-cyan-400">'+zswapCount+'</p></div>';}
+        if(dustCount>0){html+='<div class="bg-slate-900/50 rounded-xl p-4 border border-yellow-500/20 text-center"><p class="text-xs text-slate-500 uppercase mb-1">'+t("dustEvents")+'</p><p class="text-2xl font-bold text-yellow-400">'+dustCount+'</p></div>';}
+        html+='</div>';
+      }
+      html+='</div>';
+      enrichedContainer.innerHTML=html;
+    }).catch(function(){enrichedContainer.innerHTML='';});
+  }
 }
 
 function viewExtDetail(hash,bh,sec,meth,ts){
@@ -1940,7 +2172,7 @@ function loadStats(){
   fetch(API+"/stats").then(function(r){return r.json()}).then(function(s){
     document.getElementById("latestBlock").textContent=fmt(s.latestBlock);document.getElementById("latestBlock").classList.add("loaded");
     document.getElementById("indexedBlocks").textContent=fmt(s.totalBlocks);document.getElementById("indexedBlocks").classList.add("loaded");
-    document.getElementById("headerIndexed").textContent=fmt(s.totalBlocks);
+    var hdrEl=document.getElementById("headerIndexed");var oldVal=hdrEl.textContent;var newVal=fmt(s.totalBlocks);hdrEl.textContent=newVal;if(oldVal!==newVal&&oldVal!=="0"){hdrEl.classList.add("text-cyan-400");hdrEl.style.transition="color 0.3s ease";setTimeout(function(){hdrEl.classList.remove("text-cyan-400");hdrEl.style.color="";},1000);}
     document.getElementById("totalTxs").textContent=fmt(s.totalExtrinsics||s.totalTransactions||0);document.getElementById("totalTxs").classList.add("loaded");
     document.getElementById("totalBlocksSub").textContent=fmt(s.totalBlocks);
     document.getElementById("currentEpoch").classList.add("loaded");document.getElementById("totalEvents").textContent=fmt(s.events||s.totalEvents||0);
@@ -2270,7 +2502,7 @@ window.addEventListener("popstate",function(){
 });
 
 if(!window.history.state)history.replaceState({page:"home"},"",location.pathname);loadStats();loadEpochData();loadValidators();loadBlockProducers();loadBlocks();loadExts();setTimeout(function(){document.getElementById("chartGridBtn").click()},500);updateTopMethods();updateSparkline();loadPrice();connectWS();loadAllBlocks();loadAllExts();loadNetworkAge();loadHealthScore();
-setInterval(loadStats,10000);setInterval(loadPrice,60000);
+setInterval(loadStats,6000);setInterval(loadPrice,60000);
 
 document.getElementById("networkBtn").addEventListener("click",function(e){e.stopPropagation();document.getElementById("networkMenu").classList.toggle("hidden")});
 document.addEventListener("click",function(){document.getElementById("networkMenu").classList.add("hidden")});
@@ -2320,6 +2552,18 @@ window.addEventListener("load",function(){
   if(path.startsWith("/block/")){
     var h=parseInt(path.replace("/block/",""));
     if(h>0){clickBlock(h);return;}
+  }
+  if(path.startsWith("/address/")){
+    var addr=path.replace("/address/","");
+    if(addr.length>10){
+      fetch(API+"/address/"+encodeURIComponent(addr)).then(function(r){
+        if(r.ok)return r.json();
+        throw new Error("not found");
+      }).then(function(data){
+        viewAddressDetail(data);(document.getElementById("deepLoader")||{style:{}}).style.display="none";(document.getElementById("mainView")||{style:{}}).style.display="block";
+      }).catch(function(){(document.getElementById("deepLoader")||{style:{}}).style.display="none";(document.getElementById("mainView")||{style:{}}).style.display="block";});
+      return;
+    }
   }
   if(path==="/blocks"){showTab("blocks");(document.getElementById("deepLoader")||{style:{}}).style.display="none";(document.getElementById("mainView")||{style:{}}).style.display="block";return;}
   if(path==="/transactions"){showTab("transactions");(document.getElementById("deepLoader")||{style:{}}).style.display="none";(document.getElementById("mainView")||{style:{}}).style.display="block";return;}
@@ -2650,10 +2894,13 @@ function renderCommitteeCards(members, epoch){
     var short=pk.length>14?(pk.slice(0,8)+"..."+pk.slice(-6)):pk;
     var typeBadge=v.type||"validator";
     var color=validatorColors[i%validatorColors.length];
+    var label=v.validatorLabel||("Validator #"+(i+1));
+    var blockStats=(v.blocksProduced!=null&&v.blocksProduced>0)?' <span class="text-[10px] text-slate-500 ml-1">('+v.blocksProduced+' '+t("blocksProducedShort")+')</span>':"";
     html+='<div onclick="copyValidator(\''+pk+'\',this)" class="group flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/50 hover:bg-slate-700/50 transition cursor-pointer border border-slate-700/30 hover:border-green-500/30 card-hover" title="Click to copy: '+pk+'">';
     html+='<div class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:'+color+'"></div>';
     html+='<div class="flex-1 min-w-0">';
-    html+='<p class="text-xs font-mono text-slate-300 group-hover:text-green-400 transition truncate">'+short+'</p>';
+    html+='<p class="text-[11px] font-semibold text-green-400">'+label+'</p>';
+    html+='<p class="text-xs font-mono text-slate-400 group-hover:text-green-300 transition truncate">'+short+blockStats+'</p>';
     html+='</div>';
     html+='<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 flex-shrink-0">'+typeBadge+'</span>';
     html+='</div>';
@@ -2677,6 +2924,7 @@ function loadBlockProducers(){
     var rankLabels=["1st","2nd","3rd"];
     producers.forEach(function(p,i){
       var short=p.pubkey.length>14?(p.pubkey.slice(0,8)+"..."+p.pubkey.slice(-6)):p.pubkey;
+      var nameLabel=p.name||"";
       var barColor=i<3?rankColors[i]:"#3b82f6";
       var badge="";
       if(i<3){
@@ -2687,6 +2935,7 @@ function loadBlockProducers(){
       html+='<span class="text-xs text-slate-500 w-6 text-right flex-shrink-0">#'+(i+1)+'</span>';
       html+=badge;
       html+='<div class="flex-1 min-w-0">';
+      if(nameLabel){html+='<div class="flex items-center gap-2 mb-0.5"><span class="text-xs font-semibold text-green-400">'+nameLabel+'</span>'+(p.type?'<span class="text-[9px] px-1 py-0.5 rounded bg-slate-700/50 text-slate-400">'+p.type+'</span>':"")+'</div>';}
       html+='<div class="flex items-center justify-between mb-1">';
       html+='<span class="text-xs font-mono text-slate-300 truncate">'+short+'</span>';
       html+='<span class="text-xs text-slate-400 flex-shrink-0 ml-2">'+p.blocks+' blocks ('+p.percentage+'%)</span>';
@@ -3046,8 +3295,57 @@ function loadAnalyticsDash(){
     document.getElementById("deployedContractsList").innerHTML='<div class="px-4 py-8 text-center text-slate-500">No deployed contracts data</div>';
   });
 
+  // Load DUST Fee Tracker
+  loadDustTracker();
+
   if(analyticsInterval)clearInterval(analyticsInterval);
   analyticsInterval=setInterval(function(){if(currentTab==="analytics")loadAnalyticsDash()},30000);
+}
+
+var dustChartInstance=null;
+function loadDustTracker(){
+  fetch(API+"/analytics/dust").then(function(r){return r.json()}).then(function(data){
+    if(!data)return;
+    var totalEl=document.getElementById("dustTotalTxs");
+    if(totalEl)animateCounter(totalEl,data.totalTransactions||0);
+    var evtEl=document.getElementById("dustEventCount");
+    var evtCount=(data.dustEvents||[]).reduce(function(sum,e){return sum+(e.count||0)},0);
+    if(evtEl)animateCounter(evtEl,evtCount);
+    var canvas=document.getElementById("dustChartCanvas");
+    if(!canvas||!data.hourlyActivity||!data.hourlyActivity.length)return;
+    var hourly=data.hourlyActivity.slice().reverse();
+    var labels=hourly.map(function(h){
+      var d=new Date(h.hour);
+      return (d.getMonth()+1)+"/"+d.getDate()+" "+d.getHours()+":00";
+    });
+    var values=hourly.map(function(h){return h.txs||0});
+    if(dustChartInstance){dustChartInstance.destroy();}
+    dustChartInstance=new Chart(canvas.getContext("2d"),{
+      type:"bar",
+      data:{
+        labels:labels,
+        datasets:[{
+          label:"Fee-Paying Txs / Hour",
+          data:values,
+          backgroundColor:"rgba(245,158,11,0.4)",
+          borderColor:"rgba(245,158,11,0.8)",
+          borderWidth:1,
+          borderRadius:4
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{backgroundColor:"rgba(15,23,42,0.9)",titleColor:"#f59e0b",bodyColor:"#e2e8f0",borderColor:"rgba(245,158,11,0.3)",borderWidth:1}},
+        scales:{
+          x:{display:true,ticks:{color:"#64748b",font:{size:9},maxRotation:45,maxTicksLimit:12},grid:{display:false}},
+          y:{display:true,ticks:{color:"#64748b",font:{size:10}},grid:{color:"rgba(100,116,139,0.1)"}}
+        }
+      }
+    });
+  }).catch(function(e){
+    console.log("DUST tracker error:",e);
+  });
 }
 
 function renderAnalyticsDailyChart(contractData){

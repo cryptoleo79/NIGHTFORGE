@@ -340,6 +340,37 @@ export function searchByHash(hash: string) {
   return null;
 }
 
+// Address activity lookup
+export function getAddressActivity(address: string, limit = 50) {
+  // Transactions signed by this address
+  const transactions = db.prepare(`
+    SELECT * FROM extrinsics WHERE signer = ? ORDER BY block_height DESC LIMIT ?
+  `).all(address, limit) as any[];
+
+  // Events that reference this address in their data
+  const events = db.prepare(`
+    SELECT e.* FROM events e WHERE e.data LIKE '%' || ? || '%' ORDER BY e.block_height DESC LIMIT ?
+  `).all(address, limit) as any[];
+
+  const transactionCount = transactions.length;
+  const allBlocks = [
+    ...transactions.map((t: any) => t.block_height),
+    ...events.map((e: any) => e.block_height),
+  ].filter(Boolean);
+
+  const firstSeen = allBlocks.length > 0 ? Math.min(...allBlocks) : null;
+  const lastSeen = allBlocks.length > 0 ? Math.max(...allBlocks) : null;
+
+  return {
+    address,
+    transactionCount,
+    firstSeen,
+    lastSeen,
+    transactions,
+    events,
+  };
+}
+
 // --- Analytics query functions ---
 
 export function getMidnightTxsWithTimestamp(hours: number) {

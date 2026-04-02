@@ -25,6 +25,7 @@ import {
   getGovernanceData,
   getEpochTimeline,
   getCardanoAnchors,
+  getAddressActivity,
   db,
 } from '../indexer/database.js';
 import config from '../config.js';
@@ -38,7 +39,7 @@ app.use(express.json());
 // Rewrite non-API paths to /api/ prefix for nginx proxy compatibility
 // (nginx strips /api/mainnet/ prefix, so backend receives /governance instead of /api/governance)
 // Exclude paths that have their own non-prefixed route aliases
-const aliasedPaths = ['/block/', '/blocks', '/extrinsics', '/extrinsic/', '/stats', '/search', '/analytics/volume', '/health', '/docs', '/block-producers'];
+const aliasedPaths = ['/block/', '/blocks', '/extrinsics', '/extrinsic/', '/stats', '/search', '/analytics/volume', '/health', '/docs', '/block-producers', '/address/', '/tx-enriched/'];
 app.use((req, res, next) => {
   if (!req.path.startsWith('/api/') && req.path !== '/' && !req.path.match(/\.(js|css|html|ico|png|svg|woff)$/) && !aliasedPaths.some(p => req.path.startsWith(p))) {
     req.url = '/api' + req.url;
@@ -460,6 +461,57 @@ app.get('/extrinsic/:hash/decoded', (req, res) => {
   }
 });
 
+// --- Enriched Transaction Data from Official Indexer ---
+app.get('/api/tx-enriched/:hash', async (req, res) => {
+  try {
+    const hash = req.params.hash.startsWith('0x') ? req.params.hash.slice(2) : req.params.hash;
+
+    // Query official indexer for rich tx data
+    const resp = await fetch('https://indexer.mainnet.midnight.network/api/v4/graphql', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: `{ transactions(offset: { hash: "${hash}" }) { hash id protocolVersion contractActions { __typename address state } unshieldedCreatedOutputs { value } unshieldedSpentOutputs { value } zswapLedgerEvents { __typename } dustLedgerEvents { __typename } block { height author timestamp } } }`
+      }),
+      signal: AbortSignal.timeout(10000),
+    });
+    const data = await resp.json() as any;
+
+    // Also get local data
+    const localTx = getExtrinsicByHash('0x' + hash) || getExtrinsicByHash(hash);
+
+    // Map block author to validator name
+    let authorName: string | null = null;
+    try {
+      const enrichedTx = data?.data?.transactions?.[0];
+      if (enrichedTx?.block?.author) {
+        const committeeData = getCommitteeMembers();
+        if (committeeData && committeeData.members) {
+          committeeData.members.forEach((m: any, i: number) => {
+            const aura = (m.auraKey || '').replace('0x', '');
+            if (aura === enrichedTx.block.author) {
+              authorName = `Validator #${i + 1}`;
+            }
+          });
+        }
+      }
+    } catch {}
+
+    res.json({
+      local: localTx,
+      enriched: data?.data?.transactions?.[0] || null,
+      authorName,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/tx-enriched/:hash', async (req, res) => {
+  req.url = '/api/tx-enriched/' + req.params.hash;
+  app.handle(req, res);
+});
+
 app.get('/api/extrinsics/stats', (req, res) => {
   try {
     const stats = getExtrinsicStats();
@@ -659,6 +711,29 @@ app.get('/api/analytics/privacy', (req, res) => {
 app.get('/api/committee', (req, res) => {
   try {
     const data = getCommitteeMembers();
+
+    // Cross-reference with block producer data to show block stats per member
+    try {
+      if (data && data.members && blockProducerCache && blockProducerCache.data) {
+        const producerMap: Record<string, any> = {};
+        (blockProducerCache.data.producers || []).forEach((p: any) => {
+          producerMap[p.pubkey] = p;
+        });
+        data.members.forEach((m: any, i: number) => {
+          m.validatorLabel = `Validator #${i + 1}`;
+          const aura = (m.auraKey || '').replace('0x', '');
+          const match = producerMap[aura];
+          if (match) {
+            m.blocksProduced = match.blocks;
+            m.blockPercentage = match.percentage;
+          } else {
+            m.blocksProduced = 0;
+            m.blockPercentage = 0;
+          }
+        });
+      }
+    } catch {}
+
     res.json(data);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -728,6 +803,25 @@ app.get('/api/block-producers', async (req, res) => {
     producers.forEach(p => {
       p.percentage = totalSampled > 0 ? Math.round((p.blocks / totalSampled) * 10000) / 100 : 0;
     });
+
+    // Map aura keys to validator names from committee data
+    try {
+      const committeeData = getCommitteeMembers();
+      const auraMap: Record<string, { name: string; type: string }> = {};
+      if (committeeData && committeeData.members) {
+        committeeData.members.forEach((m: any, i: number) => {
+          const aura = (m.auraKey || '').replace('0x', '');
+          auraMap[aura] = { name: `Validator #${i + 1}`, type: m.type };
+        });
+      }
+      producers.forEach((p: any) => {
+        const match = auraMap[p.pubkey];
+        if (match) {
+          p.name = match.name;
+          p.type = match.type;
+        }
+      });
+    } catch {}
 
     const result = {
       totalBlocks: latestHeight,
@@ -849,6 +943,49 @@ app.get('/api/analytics/overview', (req, res) => {
   }
 });
 
+// --- DUST Fee Tracker API ---
+app.get('/api/analytics/dust', (req, res) => {
+  try {
+    // Count dust-related events from our events table
+    const dustEvents = db.prepare(`
+      SELECT section, method, COUNT(*) as count
+      FROM events
+      WHERE section IN ('dust', 'dustSystem', 'midnightSystem')
+         OR method LIKE '%dust%' OR method LIKE '%Dust%' OR method LIKE '%fee%' OR method LIKE '%Fee%'
+      GROUP BY section, method
+      ORDER BY count DESC
+    `).all();
+
+    // Get fee-related data from extrinsics
+    // On Midnight, fees are paid in DUST which is tracked through events
+    // Count transactions per hour to estimate DUST consumption
+    const hourly = db.prepare(`
+      SELECT
+        datetime((timestamp / 3600) * 3600, 'unixepoch') as hour,
+        COUNT(*) as txs
+      FROM extrinsics
+      WHERE timestamp >= ? AND section != 'timestamp'
+      GROUP BY (timestamp / 3600)
+      ORDER BY hour DESC
+      LIMIT 48
+    `).all(Math.floor(Date.now()/1000) - 172800);
+
+    // Total non-timestamp extrinsics (each consumes DUST)
+    const totalTxs = db.prepare(`
+      SELECT COUNT(*) as count FROM extrinsics WHERE section != 'timestamp'
+    `).get() as any;
+
+    res.json({
+      totalTransactions: totalTxs.count,
+      dustEvents,
+      hourlyActivity: hourly,
+      note: "Each transaction on Midnight consumes DUST as a fee. DUST is generated from NIGHT tokens over time."
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // --- Governance Dashboard API ---
 app.get('/api/governance', (req, res) => {
   try {
@@ -875,6 +1012,41 @@ app.get('/api/cardano-anchors', (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 200);
     const data = getCardanoAnchors(limit);
+    res.json(data);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// --- Address Lookup API ---
+app.get('/api/address/:address', (req, res) => {
+  try {
+    const { address } = req.params;
+    if (!address) {
+      return res.status(400).json({ error: 'Address parameter is required' });
+    }
+    const limit = Math.min(parseInt(req.query.limit as string) || 50, 200);
+    const data = getAddressActivity(address, limit);
+    if (data.transactionCount === 0 && data.events.length === 0) {
+      return res.status(404).json({ error: 'Address not found', address });
+    }
+    res.json(data);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/address/:address', (req, res) => {
+  try {
+    const { address } = req.params;
+    if (!address) {
+      return res.status(400).json({ error: 'Address parameter is required' });
+    }
+    const limit = Math.min(parseInt(req.query.limit as string) || 50, 200);
+    const data = getAddressActivity(address, limit);
+    if (data.transactionCount === 0 && data.events.length === 0) {
+      return res.status(404).json({ error: 'Address not found', address });
+    }
     res.json(data);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -1731,10 +1903,12 @@ export function startAPI() {
     console.log(`  GET /api/analytics/events - Event type breakdown`);
     console.log(`  GET /api/committee - Current committee members`);
     console.log(`  GET /api/block-producers - Block producer leaderboard`);
+    console.log(`  GET /api/tx-enriched/:hash - Enriched transaction data from official indexer`);
     console.log(`  GET /api/contracts/deployed - Deployed contracts (event-based)`);
     console.log(`  GET /api/governance - Governance dashboard`);
     console.log(`  GET /api/epochs - Epoch timeline`);
     console.log(`  GET /api/cardano-anchors - Cardano anchor points`);
+    console.log(`  GET /api/address/:address - Address activity lookup`);
   });
 }
 
