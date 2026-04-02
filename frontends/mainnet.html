@@ -461,6 +461,15 @@
           </div>
           <div id="validatorGrid" class="p-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2"></div>
         </div>
+        <div class="glass rounded-2xl border border-slate-700/50 overflow-hidden mb-6 mt-4">
+          <div class="px-6 py-4 border-b border-slate-700/30">
+            <h3 class="font-semibold text-white" data-i18n="blockProducers">Block Producers</h3>
+            <p class="text-xs text-slate-500">Validator block production distribution</p>
+          </div>
+          <div id="blockProducersList" class="p-4 space-y-2">
+            <p class="text-center text-slate-500 text-sm py-4">Loading...</p>
+          </div>
+        </div>
       <div class="grid lg:grid-cols-2 gap-6">
         <div class="bg-slate-800/40 rounded-2xl border border-slate-700/50 overflow-hidden">
           <div class="px-5 py-4 border-b border-slate-700/50 flex items-center justify-between">
@@ -1432,7 +1441,8 @@ var translations = {
     nightTokenTitle: "NIGHT Token",
     nightTokenDesc: "NIGHT is Midnight's native utility token distributed via the Glacier Drop program. NIGHT generates DUST (fee resource) over time - like solar panels generating electricity. Hold NIGHT to power transactions without volatile gas fees.",
     networkHealth: "Network Health",
-    builtInJapan: "\uD83C\uDDEF\uD83C\uDDF5 Built in Japan"
+    builtInJapan: "\uD83C\uDDEF\uD83C\uDDF5 Built in Japan",
+    blockProducers: "Block Producers"
   },
   jp: {
     overview: "概要", blocks: "ブロック", extrinsics: "エクストリンシック",
@@ -1499,7 +1509,8 @@ var translations = {
     nightTokenTitle: "NIGHT トークン",
     nightTokenDesc: "NIGHTはGlacier Dropプログラムで配布されたMidnightのネイティブユーティリティトークンです。NIGHTは時間の経過とともにDUST（手数料リソース）を生成します。NIGHTを保有することで、変動するガス代なしでトランザクションを実行できます。",
     networkHealth: "ネットワーク健全性",
-    builtInJapan: "\uD83C\uDDEF\uD83C\uDDF5 日本製"
+    builtInJapan: "\uD83C\uDDEF\uD83C\uDDF5 日本製",
+    blockProducers: "ブロック生成者"
   }
 };
 
@@ -2258,7 +2269,7 @@ window.addEventListener("popstate",function(){
   setTimeout(function(){isPopState=false;},100);
 });
 
-if(!window.history.state)history.replaceState({page:"home"},"",location.pathname);loadStats();loadEpochData();loadValidators();loadBlocks();loadExts();setTimeout(function(){document.getElementById("chartGridBtn").click()},500);updateTopMethods();updateSparkline();loadPrice();connectWS();loadAllBlocks();loadAllExts();loadNetworkAge();loadHealthScore();
+if(!window.history.state)history.replaceState({page:"home"},"",location.pathname);loadStats();loadEpochData();loadValidators();loadBlockProducers();loadBlocks();loadExts();setTimeout(function(){document.getElementById("chartGridBtn").click()},500);updateTopMethods();updateSparkline();loadPrice();connectWS();loadAllBlocks();loadAllExts();loadNetworkAge();loadHealthScore();
 setInterval(loadStats,10000);setInterval(loadPrice,60000);
 
 document.getElementById("networkBtn").addEventListener("click",function(e){e.stopPropagation();document.getElementById("networkMenu").classList.toggle("hidden")});
@@ -2649,6 +2660,49 @@ function renderCommitteeCards(members, epoch){
   });
   document.getElementById("validatorGrid").innerHTML=html;
 }
+
+// Block Producer Leaderboard
+function loadBlockProducers(){
+  fetch(API+"/block-producers").then(function(r){return r.json()}).then(function(data){
+    if(!data||!data.producers)return;
+    var el=document.getElementById("blockProducersList");
+    if(!el)return;
+    var producers=data.producers;
+    if(producers.length===0){
+      el.innerHTML='<p class="text-center text-slate-500 text-sm py-4">No block producer data available</p>';
+      return;
+    }
+    var html='<div class="flex items-center justify-between mb-3"><span class="text-xs text-slate-500">Sampled '+fmt(data.sampled)+' of '+fmt(data.totalBlocks)+' blocks</span></div>';
+    var rankColors=["#eab308","#94a3b8","#cd7f32"];
+    var rankLabels=["1st","2nd","3rd"];
+    producers.forEach(function(p,i){
+      var short=p.pubkey.length>14?(p.pubkey.slice(0,8)+"..."+p.pubkey.slice(-6)):p.pubkey;
+      var barColor=i<3?rankColors[i]:"#3b82f6";
+      var badge="";
+      if(i<3){
+        var bgColors=["bg-yellow-500/20 text-yellow-400 border-yellow-500/30","bg-slate-400/20 text-slate-300 border-slate-400/30","bg-amber-700/20 text-amber-600 border-amber-700/30"];
+        badge='<span class="text-[10px] px-1.5 py-0.5 rounded-full border '+bgColors[i]+' font-bold flex-shrink-0">'+rankLabels[i]+'</span>';
+      }
+      html+='<div class="flex items-center gap-3 py-2 px-3 rounded-lg bg-slate-800/30 hover:bg-slate-700/30 transition">';
+      html+='<span class="text-xs text-slate-500 w-6 text-right flex-shrink-0">#'+(i+1)+'</span>';
+      html+=badge;
+      html+='<div class="flex-1 min-w-0">';
+      html+='<div class="flex items-center justify-between mb-1">';
+      html+='<span class="text-xs font-mono text-slate-300 truncate">'+short+'</span>';
+      html+='<span class="text-xs text-slate-400 flex-shrink-0 ml-2">'+p.blocks+' blocks ('+p.percentage+'%)</span>';
+      html+='</div>';
+      html+='<div class="h-1.5 bg-slate-700/50 rounded-full overflow-hidden">';
+      html+='<div class="h-full rounded-full transition-all duration-500" style="width:'+Math.max(2,p.percentage)+'%;background:'+barColor+'"></div>';
+      html+='</div>';
+      html+='</div>';
+      html+='</div>';
+    });
+    el.innerHTML=html;
+  }).catch(function(e){
+    console.log("Block producers load error:",e);
+  });
+}
+setInterval(loadBlockProducers,300000); // Refresh every 5 minutes
 setInterval(loadValidators,60000);setInterval(loadExts,60000);
 
 // ============================================

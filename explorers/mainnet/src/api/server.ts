@@ -38,7 +38,7 @@ app.use(express.json());
 // Rewrite non-API paths to /api/ prefix for nginx proxy compatibility
 // (nginx strips /api/mainnet/ prefix, so backend receives /governance instead of /api/governance)
 // Exclude paths that have their own non-prefixed route aliases
-const aliasedPaths = ['/block/', '/blocks', '/extrinsics', '/extrinsic/', '/stats', '/search', '/analytics/volume', '/health', '/docs'];
+const aliasedPaths = ['/block/', '/blocks', '/extrinsics', '/extrinsic/', '/stats', '/search', '/analytics/volume', '/health', '/docs', '/block-producers'];
 app.use((req, res, next) => {
   if (!req.path.startsWith('/api/') && req.path !== '/' && !req.path.match(/\.(js|css|html|ico|png|svg|woff)$/) && !aliasedPaths.some(p => req.path.startsWith(p))) {
     req.url = '/api' + req.url;
@@ -665,6 +665,91 @@ app.get('/api/committee', (req, res) => {
   }
 });
 
+// --- Block Producers Leaderboard (queries official Midnight indexer) ---
+let blockProducerCache: { data: any; ts: number } | null = null;
+
+app.get('/api/block-producers', async (req, res) => {
+  try {
+    const now = Date.now();
+    // Return cached result if less than 5 minutes old
+    if (blockProducerCache && now - blockProducerCache.ts < 300000) {
+      return res.json(blockProducerCache.data);
+    }
+
+    const limit = Math.min(parseInt(req.query.limit as string) || 500, 2000);
+
+    // Query the official indexer for the latest block height
+    const response = await fetch('https://indexer.mainnet.midnight.network/api/v4/graphql', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: `{ block { height } }`
+      }),
+      signal: AbortSignal.timeout(10000),
+    });
+    const latestData = await response.json() as any;
+    const latestHeight = latestData?.data?.block?.height || 0;
+
+    // Sample block authors at various heights
+    const sampleHeights: number[] = [];
+    for (let h = latestHeight; h > Math.max(0, latestHeight - limit) && sampleHeights.length < 100; h -= Math.max(1, Math.floor(limit / 100))) {
+      sampleHeights.push(h);
+    }
+
+    // Batch query - get 10 blocks at a time
+    const authors: Record<string, number> = {};
+    const batchSize = 10;
+    for (let i = 0; i < sampleHeights.length; i += batchSize) {
+      const batch = sampleHeights.slice(i, i + batchSize);
+      const queries = batch.map((h, idx) => `b${idx}: block(offset: { height: ${h} }) { height author }`).join('\n');
+      const batchResp = await fetch('https://indexer.mainnet.midnight.network/api/v4/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: `{ ${queries} }` }),
+        signal: AbortSignal.timeout(15000),
+      });
+      const batchData = await batchResp.json() as any;
+      if (batchData?.data) {
+        for (const key of Object.keys(batchData.data)) {
+          const block = batchData.data[key];
+          if (block?.author) {
+            authors[block.author] = (authors[block.author] || 0) + 1;
+          }
+        }
+      }
+    }
+
+    // Sort by blocks produced
+    const producers = Object.entries(authors)
+      .map(([pubkey, blocks]) => ({ pubkey, blocks, percentage: 0 }))
+      .sort((a, b) => b.blocks - a.blocks);
+
+    const totalSampled = producers.reduce((s, p) => s + p.blocks, 0);
+    producers.forEach(p => {
+      p.percentage = totalSampled > 0 ? Math.round((p.blocks / totalSampled) * 10000) / 100 : 0;
+    });
+
+    const result = {
+      totalBlocks: latestHeight,
+      sampled: totalSampled,
+      producers,
+    };
+
+    blockProducerCache = { data: result, ts: now };
+    res.json(result);
+  } catch (error: any) {
+    // Return stale cache on error if available
+    if (blockProducerCache) return res.json(blockProducerCache.data);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/block-producers', async (req, res) => {
+  // Alias without /api prefix
+  req.url = '/api/block-producers' + (req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : '');
+  app.handle(req, res);
+});
+
 // --- Deployed Contracts API (event-based) ---
 app.get('/api/contracts/deployed', (req, res) => {
   try {
@@ -907,6 +992,7 @@ function getDocsHTML(baseUrl: string) {
         <ul class="space-y-1">
           <li><a href="#governance" class="block px-2 py-1 rounded hover:bg-dark-100 text-slate-300 hover:text-white">/api/governance</a></li>
           <li><a href="#committee" class="block px-2 py-1 rounded hover:bg-dark-100 text-slate-300 hover:text-white">/api/committee</a></li>
+          <li><a href="#block-producers" class="block px-2 py-1 rounded hover:bg-dark-100 text-slate-300 hover:text-white">/api/block-producers</a></li>
         </ul>
       </div>
       <div>
@@ -1435,6 +1521,28 @@ function getDocsHTML(baseUrl: string) {
   { "address": "5G...", "role": "member", "since_epoch": 10 }
 ]</code></pre>
         </div>
+
+        <div id="block-producers" class="mb-8 bg-dark-200 rounded-lg border border-slate-800 p-5">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="bg-emerald-700 text-white text-xs font-bold px-2 py-0.5 rounded">GET</span>
+              <code class="text-white">/api/block-producers</code>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="copyUrl('/api/block-producers')" class="copy-btn text-xs bg-dark-100 hover:bg-slate-700 text-slate-400 px-2 py-1 rounded">Copy URL</button>
+              <a href="${baseUrl}/api/block-producers" target="_blank" class="text-xs bg-midnight-500/20 hover:bg-midnight-500/30 text-midnight-400 px-2 py-1 rounded">Try it</a>
+            </div>
+          </div>
+          <p class="text-sm text-slate-400 mb-3">Block producer leaderboard. Queries the official Midnight indexer to sample recent blocks and aggregate by author. Cached for 5 minutes.</p>
+          <div class="mb-2"><span class="text-xs text-slate-500">Query params:</span> <code class="text-xs text-midnight-400">?limit=500</code> <span class="text-xs text-slate-500">(max 2000, default 500)</span></div>
+          <pre class="bg-dark-400 rounded p-3 text-xs text-slate-300 overflow-x-auto"><code>{
+  "totalBlocks": 750000,
+  "sampled": 100,
+  "producers": [
+    { "pubkey": "0xabc123...", "blocks": 15, "percentage": 15.0 }
+  ]
+}</code></pre>
+        </div>
       </section>
 
       <!-- EPOCHS -->
@@ -1622,6 +1730,7 @@ export function startAPI() {
     console.log(`  GET /api/analytics/overview - Network overview`);
     console.log(`  GET /api/analytics/events - Event type breakdown`);
     console.log(`  GET /api/committee - Current committee members`);
+    console.log(`  GET /api/block-producers - Block producer leaderboard`);
     console.log(`  GET /api/contracts/deployed - Deployed contracts (event-based)`);
     console.log(`  GET /api/governance - Governance dashboard`);
     console.log(`  GET /api/epochs - Epoch timeline`);
