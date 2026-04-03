@@ -521,7 +521,7 @@ export function getPrivacyFromEvents(hours?: number) {
   const contractDeploys = (db.prepare("SELECT COUNT(*) as count FROM events WHERE section = 'midnight' AND method = 'ContractDeploy'").get() as { count: number }).count;
   const contractCalls = (db.prepare("SELECT COUNT(*) as count FROM events WHERE section = 'midnight' AND method = 'ContractCall'").get() as { count: number }).count;
 
-  const shieldedRatio = totalTxApplied > 0 ? Math.round((shieldedTxCount / totalTxApplied) * 100) / 100 : 0;
+  const shieldedRatio = totalTxApplied > 0 ? Math.round((shieldedTxCount / totalTxApplied) * 10000) / 10000 : 0;
 
   // Get unshielded details
   const unshieldedDetails = db.prepare(`

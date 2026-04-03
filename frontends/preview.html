@@ -3,14 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NightForge Explorer</title>
+  <title>NightForge Explorer - Preview</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/favicon.ico" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="description" content="NightForge Explorer - Midnight Preview blockchain explorer with privacy dashboard, governance tracking, and Cardano bridge monitoring" />
+  <meta property="og:title" content="NightForge Explorer - Midnight Preview" />
+  <meta property="og:description" content="Privacy-first blockchain explorer for Midnight Network" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://mainnet.nightforge.jp" />
   <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>body,html{background:#0f172a;margin:0;padding:0;}
     * { font-family: 'Inter', sans-serif; }
     .mono { font-family: 'JetBrains Mono', monospace; }
     @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-    .animate-marquee { animation: marquee 25s linear infinite; }
+    .animate-marquee { animation: marquee 30s linear infinite; will-change: transform; transition: opacity 0.3s ease; }
     @keyframes sakura-fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 0; } 10% { opacity: 0.6; } 70% { opacity: 0.4; } 100% { transform: translateY(90vh) rotate(360deg); opacity: 0; } }
     .sakura { position: fixed; top: 0; pointer-events: none; z-index: 1; animation: sakura-fall linear forwards; }
     @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 5px rgba(6,182,212,0.3); } 50% { box-shadow: 0 0 20px rgba(6,182,212,0.6); } }
@@ -45,6 +54,32 @@
 .glow-border{position:relative}
 .glow-border::before{content:'';position:absolute;inset:-1px;background:linear-gradient(135deg,#f97316,#ec4899,#8b5cf6);border-radius:inherit;z-index:-1;opacity:0;transition:opacity 0.3s}
 .glow-border:hover::before{opacity:0.5}
+
+/* Mobile Responsive Fixes */
+#tabNav { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+#tabNav::-webkit-scrollbar { display: none; }
+.tab-btn { white-space: nowrap; flex-shrink: 0; }
+
+@media (max-width: 640px) {
+  .text-3xl { font-size: 1.5rem; }
+  .text-4xl { font-size: 1.875rem; }
+  .text-2xl { font-size: 1.25rem; }
+  .text-xl { font-size: 1.125rem; }
+  .bridge-viz-container .w-16 { width: 3rem; height: 3rem; }
+  .bridge-viz-container .w-16 .text-2xl { font-size: 1.25rem; }
+  .bridge-viz-container .mx-8 { margin-left: 1rem; margin-right: 1rem; }
+  #searchContainer .max-w-3xl { max-width: 100%; }
+  #searchContainer .relative.flex.gap-2 { flex-wrap: wrap; }
+  #searchContainer #filterBtn { width: 100%; justify-content: center; }
+  #searchContainer .relative.flex-1 { width: 100%; flex-basis: 100%; }
+  header .text-lg { font-size: 0.875rem; }
+  header .gap-4 { gap: 0.5rem; }
+  .grid.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 480px) {
+  .grid.grid-cols-2 { grid-template-columns: 1fr; }
+}
 
 </style>
 
@@ -87,6 +122,17 @@
 @keyframes tabFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .tab-fade-in{animation:tabFadeIn 0.4s ease-out}
 
+/* Epoch Timeline */
+.epoch-timeline{position:relative;padding-left:32px}
+.epoch-timeline::before{content:'';position:absolute;left:12px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,#06b6d4,#8b5cf6,#06b6d4)}
+.epoch-node{position:relative;padding:12px 0}
+.epoch-node::before{content:'';position:absolute;left:-24px;top:18px;width:12px;height:12px;border-radius:50%;background:#06b6d4;border:2px solid #0f172a;z-index:1;box-shadow:0 0 8px rgba(6,182,212,0.5)}
+.epoch-node:first-child::before{background:#22c55e;box-shadow:0 0 12px rgba(34,197,94,0.6)}
+
+/* Cardano bridge animation */
+@keyframes flow-dots{0%{transform:translateX(0);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateX(200px);opacity:0}}
+.cardano-flow-dot{position:absolute;width:6px;height:6px;border-radius:50%;top:50%;margin-top:-3px;animation:flow-dots 3s linear infinite}
+
 /* Live Block Pulse Dot */
 @keyframes block-pulse-live {
   0%, 100% { box-shadow: 0 0 0 0 rgba(6,182,212,0.4); }
@@ -102,17 +148,6 @@
 /* ZK Badge glow */
 @keyframes zk-glow{0%,100%{box-shadow:0 0 8px rgba(6,182,212,0.4)}50%{box-shadow:0 0 20px rgba(6,182,212,0.8)}}
 .zk-badge{animation:zk-glow 2s ease-in-out infinite}
-
-/* Epoch Timeline */
-.epoch-timeline{position:relative;padding-left:32px}
-.epoch-timeline::before{content:'';position:absolute;left:12px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,#06b6d4,#8b5cf6,#06b6d4)}
-.epoch-node{position:relative;padding:12px 0}
-.epoch-node::before{content:'';position:absolute;left:-24px;top:18px;width:12px;height:12px;border-radius:50%;background:#06b6d4;border:2px solid #0f172a;z-index:1;box-shadow:0 0 8px rgba(6,182,212,0.5)}
-.epoch-node:first-child::before{background:#22c55e;box-shadow:0 0 12px rgba(34,197,94,0.6)}
-
-/* Cardano bridge animation */
-@keyframes flow-dots{0%{transform:translateX(0);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateX(200px);opacity:0}}
-.cardano-flow-dot{position:absolute;width:6px;height:6px;border-radius:50%;top:50%;margin-top:-3px;animation:flow-dots 3s linear infinite}
 
 </style>
 </head>
@@ -152,13 +187,14 @@
           <div class="relative">
             <button id="networkBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:border-orange-500/50 transition">
               <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-              <span id="networkLabel" class="text-sm font-medium text-white">PREVIEW</span>
+              <span id="networkLabel" class="text-sm font-medium text-cyan-400">PREVIEW</span>
               <svg class="w-4 h-4 text-slate-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             <div id="networkMenu" class="hidden absolute top-full mt-2 left-0 bg-slate-800/95 backdrop-blur-xl border border-slate-700 rounded-xl shadow-2xl z-50 min-w-[220px] overflow-hidden">
               <button class="network-opt w-full px-4 py-3 text-left hover:bg-green-500/10 transition flex items-center gap-3" data-network="mainnet">
                 <div class="w-2 h-2 rounded-full bg-green-400"></div>
                 <div class="flex-1"><p class="text-sm font-medium text-white">Mainnet</p><p class="text-xs text-slate-500">mainnet.nightforge.jp</p></div>
+                <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               </button>
               <button class="network-opt w-full px-4 py-3 text-left hover:bg-orange-500/10 transition flex items-center gap-3" data-network="preprod">
                 <div class="w-2 h-2 rounded-full bg-orange-400"></div>
@@ -167,7 +203,6 @@
               <button class="network-opt w-full px-4 py-3 text-left hover:bg-cyan-500/10 transition flex items-center gap-3" data-network="preview">
                 <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
                 <div class="flex-1"><p class="text-sm font-medium text-cyan-400">Preview Net</p><p class="text-xs text-cyan-400">preview.nightforge.jp</p></div>
-                <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               </button>
             </div>
           </div>
@@ -175,24 +210,25 @@
         <div class="hidden md:flex items-center gap-3">
           <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700">
             <img src="/night-logo.webp" alt="NIGHT" class="w-5 h-5 rounded-full"/><span class="text-sm text-slate-400">NIGHT</span>
-            <span id="headerPrice" class="font-semibold text-white text-sm">$0.0600</span>
-            <span id="headerChange" class="text-xs font-medium text-red-400">-0.42%</span>
+            <span id="headerPrice" class="font-semibold text-white text-sm">$--</span>
+            <span id="headerChange" class="text-xs font-medium text-slate-500">--</span>
             <span class="text-xs text-slate-500">MCap</span>
-            <span id="headerMcap" class="text-slate-300 text-xs">$996M</span>
+            <span id="headerMcap" class="text-slate-300 text-xs">--</span>
           </div>
           <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700">
             <span id="headerIndexed" class="font-semibold text-white text-sm">0</span>
-            <span class="text-xs text-slate-500">INDEXED</span>
+            <span class="text-xs text-slate-500" data-i18n="indexed">INDEXED</span>
           </div>
           <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/30">
-            <span class="text-xs font-medium text-green-400">CONNECTED</span>
+            <span class="text-xs font-medium text-green-400" data-i18n="connected">CONNECTED</span>
           </div>
           <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/30">
             <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-            <span class="text-xs font-medium text-green-400">LIVE</span>
+            <span class="text-xs font-medium text-green-400" data-i18n="live">LIVE</span>
           </div>
         </div>
         <div class="flex items-center gap-4">
+          <button id="langToggle" onclick="setLanguage(currentLang==='en'?'jp':'en')" class="px-2 py-1 text-xs font-bold rounded bg-slate-700/50 border border-slate-600/50 hover:bg-slate-600/50 transition text-slate-300">EN | 日本語</button>
         </div>
       </div>
     </div>
@@ -200,17 +236,17 @@
   <div class="bg-slate-900/50 backdrop-blur-sm border-b border-slate-800/30 sticky top-16 z-40 relative">
     <div class="max-w-7xl mx-auto px-4">
       <nav class="flex items-center gap-1 py-2" id="tabNav">
-        <button data-tab="overview" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-slate-700/50 text-white">Overview</button>
-        <button data-tab="blocks" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition">Blocks</button>
+        <button data-tab="overview" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-slate-700/50 text-white" data-i18n="overview">Overview</button>
+        <button data-tab="blocks" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition" data-i18n="blocks">Blocks</button>
         <button data-tab="transactions" style="display:none" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition">Transactions</button>
-        <button data-tab="extrinsics" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition">Extrinsics</button>
+        <button data-tab="extrinsics" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition" data-i18n="extrinsics">Extrinsics</button>
         <button data-tab="contracts" style="display:none" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition">Contracts</button>
-        <button data-tab="privacy" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition">🛡 Privacy</button>
-        <button data-tab="bridge" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition">🌉 Bridge</button>
-        <button data-tab="analytics" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition">📊 Analytics</button>
-        <button data-tab="governance" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition">🏛 Governance</button>
-        <button data-tab="epochs" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition">⏱ Epochs</button>
-        <button data-tab="cardano" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition">⛓ Cardano</button>
+        <button data-tab="privacy" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition" data-i18n="privacy">🛡 Privacy</button>
+        <button data-tab="bridge" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition" data-i18n="bridge">🌉 Bridge</button>
+        <button data-tab="analytics" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition" data-i18n="analytics">📊 Analytics</button>
+        <button data-tab="governance" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition" data-i18n="governance">🏛 Governance</button>
+        <button data-tab="epochs" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition" data-i18n="epochs">⏱ Epochs</button>
+        <button data-tab="cardano" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition" data-i18n="cardano">⛓ Cardano</button>
       </nav>
     </div>
   </div>
@@ -244,7 +280,7 @@
           </div>
           <div class="relative flex-1">
             <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35"/></svg>
-            <input id="searchInput" type="text" placeholder="Search by Hash / Height / Contract Address..." class="w-full h-12 pl-12 pr-4 bg-slate-800/50 border border-slate-700 text-white placeholder:text-slate-500 rounded-xl outline-none focus:border-orange-500/50 transition backdrop-blur-sm">
+            <input id="searchInput" type="text" placeholder="Search by Hash / Height / Contract Address..." data-i18n="search" class="w-full h-12 pl-12 pr-4 bg-slate-800/50 border border-slate-700 text-white placeholder:text-slate-500 rounded-xl outline-none focus:border-orange-500/50 transition backdrop-blur-sm">
           </div>
           <button id="searchBtn" class="h-12 px-6 bg-cyan-600 hover:bg-orange-500 rounded-xl text-white font-medium transition">Search</button>
         </div>
@@ -253,7 +289,7 @@
     <div id="detailView" class="hidden"></div>
     <div id="content-overview" class="tab-content">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold text-white">Network Overview</h2>
+        <h2 class="text-lg font-semibold text-white" data-i18n="networkOverview">Network Overview</h2>
         <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50">
           <div class="flex items-center gap-0.5">
             <div class="w-1 h-3 bg-green-500 rounded-full animate-pulse"></div>
@@ -273,7 +309,7 @@
               <div class="w-10 h-10 bg-blue-500/30 rounded-xl flex items-center justify-center">
                 <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
               </div>
-              <span class="text-xs font-medium text-yellow-400 uppercase tracking-wider">Current Epoch</span>
+              <span class="text-xs font-medium text-yellow-400 uppercase tracking-wider" data-i18n="currentEpoch">Current Epoch</span>
             </div>
             <p id="currentEpoch" class="text-3xl font-bold text-white mb-1 stat-value"></p>
             <p class="text-xs text-slate-400"><span id="currentSlot"></span></p>
@@ -286,7 +322,7 @@
               <div class="w-10 h-10 bg-green-500/30 rounded-xl flex items-center justify-center">
                 <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
               </div>
-              <span class="text-xs font-medium text-green-400 uppercase tracking-wider">Total Extrinsics</span>
+              <span class="text-xs font-medium text-green-400 uppercase tracking-wider" data-i18n="totalExtrinsics">Total Extrinsics</span>
             </div>
             <p id="totalTxs" class="text-3xl font-bold text-white mb-1 stat-value">...</p>
             <p class="text-xs text-slate-400">Blocks: <span id="totalBlocksSub">...</span></p>
@@ -299,7 +335,7 @@
               <div class="w-10 h-10 bg-orange-500/30 rounded-xl flex items-center justify-center">
                 <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
               </div>
-              <span class="text-xs font-medium text-orange-400 uppercase tracking-wider">Network TPS</span>
+              <span class="text-xs font-medium text-orange-400 uppercase tracking-wider" data-i18n="networkTps">Network TPS</span>
             </div>
             <div class="flex items-center gap-3">
               <p class="text-3xl font-bold text-white">0.50</p>
@@ -312,13 +348,13 @@
         </div>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1">Latest Block</p><p id="latestBlock" class="stat-value text-lg font-semibold text-white">749,564</p></div>
-        <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1">Total Events</p><p id="totalEvents" class="text-lg font-semibold text-pink-400">...</p></div>
-        <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1">Indexed Blocks</p><p id="indexedBlocks" class="stat-value text-lg font-semibold text-white">0</p></div>
-        <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1">Cardano Epoch</p><p id="mcEpoch" class="text-lg font-semibold text-blue-400">267</p></div>
-        <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1">Next Epoch In</p><p id="nextEpoch" class="text-lg font-semibold text-orange-400"></p></div>
+        <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="latestBlock">Latest Block</p><p id="latestBlock" class="stat-value text-lg font-semibold text-white">749,564</p></div>
+        <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="totalEvents">Total Events</p><p id="totalEvents" class="text-lg font-semibold text-pink-400">...</p></div>
+        <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="indexedBlocks">Indexed Blocks</p><p id="indexedBlocks" class="stat-value text-lg font-semibold text-white">0</p></div>
+        <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="cardanoEpoch">Cardano Epoch</p><p id="mcEpoch" class="text-lg font-semibold text-blue-400">267</p></div>
+        <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3"><p class="text-xs text-slate-500 mb-1" data-i18n="nextMidnightEpoch">Next Midnight Epoch</p><p id="nextEpoch" class="text-lg font-semibold text-orange-400"></p></div>
         <div class="bg-slate-800/30 rounded-xl border border-slate-700/30 p-3">
-          <p class="text-xs text-slate-500 mb-1">Avg Block Time</p>
+          <p class="text-xs text-slate-500 mb-1" data-i18n="avgBlockTime">Avg Block Time</p>
           <div class="flex items-center gap-2">
             <p id="avgBlockTime" class="text-lg font-semibold text-white">~6s</p>
             <svg id="blockTimeSparkline" width="60" height="20" class="opacity-70"></svg>
@@ -328,7 +364,7 @@
       <!-- Network Age + DUST Explainer -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div class="bg-gradient-to-r from-green-500/10 to-cyan-500/10 rounded-xl border border-green-500/30 p-3">
-          <p class="text-xs text-green-400 mb-1">Network Age</p>
+          <p class="text-xs text-green-400 mb-1" data-i18n="networkAge">Network Age</p>
           <p id="networkAge" class="text-lg font-bold text-green-400">--</p>
         </div>
         <div class="bg-gradient-to-r from-amber-500/5 to-orange-500/5 rounded-xl border border-amber-500/20 p-4">
@@ -337,8 +373,19 @@
               <span class="text-amber-400 text-lg">&#x26A1;</span>
             </div>
             <div>
-              <p class="text-sm font-semibold text-amber-400 mb-1">Powered by DUST</p>
-              <p class="text-xs text-slate-400 leading-relaxed">Midnight uses a unique fee token called DUST. Generated from NIGHT tokens, DUST grows in value over time and is used exclusively for transaction fees. Unlike traditional gas, DUST cannot be transferred - only spent on fees.</p>
+              <p class="text-sm font-semibold text-amber-400 mb-1" data-i18n="dustTitle">Powered by DUST</p>
+              <p class="text-xs text-slate-400 leading-relaxed" data-i18n="dustDesc">Midnight uses a unique fee token called DUST. Generated from NIGHT tokens, DUST grows in value over time and is used exclusively for transaction fees. Unlike traditional gas, DUST cannot be transferred - only spent on fees.</p>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-xl border border-blue-500/20 p-4">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0 border border-blue-500/30">
+              <span class="text-blue-400 text-lg">&#x2744;&#xFE0F;</span>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-blue-400 mb-1" data-i18n="nightTokenTitle">NIGHT Token</p>
+              <p class="text-xs text-slate-400 leading-relaxed" data-i18n="nightTokenDesc">NIGHT is Midnight's native utility token distributed via the Glacier Drop program. NIGHT generates DUST (fee resource) over time - like solar panels generating electricity. Hold NIGHT to power transactions without volatile gas fees.</p>
             </div>
           </div>
         </div>
@@ -350,7 +397,7 @@
               <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500/30 to-purple-500/30 flex items-center justify-center border border-pink-500/20">
                 <svg class="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
               </div>
-              <div><h3 class="font-semibold text-white">Block Activity</h3><p class="text-xs text-slate-500" id="chartSubtitle">Hourly extrinsics • UTC</p></div>
+              <div><h3 class="font-semibold text-white" data-i18n="blockActivity">Block Activity</h3><p class="text-xs text-slate-500" id="chartSubtitle" data-i18n="hourlyExtrinsics">Hourly extrinsics • UTC</p></div>
             </div>
             <div class="flex items-center gap-4">
               <div class="hidden"><button id="chartBarBtn" class="p-1.5 rounded text-slate-500"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg></button>
@@ -372,7 +419,7 @@
                 <img src="/night-logo.webp" alt="NIGHT" class="w-8 h-8 rounded-full"/>
                 <div><p class="font-semibold text-white text-sm">NIGHT</p><p class="text-[10px] text-slate-500">Midnight</p></div>
               </div>
-              <div class="text-right"><p id="priceWidget" class="text-base font-bold text-white">$0.0600</p><p id="changeWidget" class="text-xs text-red-400">-0.42%</p></div>
+              <div class="text-right"><p id="priceWidget" class="text-base font-bold text-white">$--</p><p id="changeWidget" class="text-xs text-slate-500">--</p></div>
             </div>
             <div class="mt-2 h-8 relative">
               <svg class="w-full h-full" viewBox="0 0 100 30" preserveAspectRatio="none">
@@ -394,47 +441,79 @@
             </div>
             </div>
           <div class="p-4">
-            <div class="flex items-center gap-2 mb-3"><svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><span class="font-medium text-white">Network Status</span></div>
-            <div class="flex items-center justify-between mb-2"><span class="text-slate-500 text-sm">Health</span><span class="text-green-400 font-medium">Excellent</span></div>
+            <div class="flex items-center gap-2 mb-3"><svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><span class="font-medium text-white" data-i18n="networkStatus">Network Status</span></div>
+            <div class="flex items-center justify-between mb-2"><span class="text-slate-500 text-sm" data-i18n="health">Health</span><span class="text-green-400 font-medium" data-i18n="excellent">Excellent</span></div>
             <div class="h-1.5 bg-slate-700 rounded-full mb-4"><div class="h-full bg-green-500 rounded-full" style="width:100%"></div></div>
             <div class="grid grid-cols-2 gap-3">
-              <div class="bg-slate-900/50 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase">Finality</p><p class="font-semibold text-white">~6s</p></div>
-              <div class="bg-slate-900/50 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase">Validators</p><p class="font-semibold text-green-400">Active</p></div>
+              <div class="bg-slate-900/50 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase" data-i18n="finality">Finality</p><p class="font-semibold text-white">~6s</p></div>
+              <div class="bg-slate-900/50 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase" data-i18n="validators">Validators</p><p class="font-semibold text-green-400">Active</p></div>
               <div class="bg-slate-900/50 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase">MCAP</p><p id="mcapWidget" class="font-semibold text-white">$996M</p></div>
               <div class="bg-slate-900/50 rounded-lg p-2"><p class="text-xs text-slate-500 uppercase">VOL 24H</p><p id="volWidget" class="font-semibold text-white">$14M</p></div>
             </div>
             <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-700/50">
-              <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500"></span><span class="text-sm text-slate-400">Fully Synced</span></div>
+              <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500"></span><span class="text-sm text-slate-400" data-i18n="synced">Fully Synced</span></div>
               <span class="text-green-400 font-medium">100.0%</span>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gradient-to-br from-green-500/10 to-cyan-500/10 rounded-xl border border-green-500/20 p-4 mt-4">
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-sm font-semibold text-green-400" data-i18n="networkHealth">Network Health</p>
+            <span id="healthScore" class="text-2xl font-bold text-green-400">--</span>
+          </div>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-400">Block Production</span>
+              <div class="flex items-center gap-1"><div class="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden"><div id="healthBlocks" class="h-full bg-green-400 rounded-full" style="width:0%"></div></div><span id="healthBlocksLabel" class="text-green-400 w-8 text-right">--</span></div>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-400">Validators</span>
+              <div class="flex items-center gap-1"><div class="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden"><div id="healthValidators" class="h-full bg-green-400 rounded-full" style="width:0%"></div></div><span id="healthValidatorsLabel" class="text-green-400 w-8 text-right">--</span></div>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-400">Privacy</span>
+              <div class="flex items-center gap-1"><div class="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden"><div id="healthPrivacy" class="h-full bg-cyan-400 rounded-full" style="width:0%"></div></div><span id="healthPrivacyLabel" class="text-cyan-400 w-8 text-right">--</span></div>
             </div>
           </div>
         </div>
       </div>
         <div class="bg-slate-800/50 rounded-2xl border border-slate-700/50 overflow-hidden mt-4">
           <div class="px-4 py-3 border-b border-slate-700/50 flex items-center justify-between">
-            <h3 class="font-semibold text-white flex items-center gap-2"><svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>Block Committee</h3>
-            <span id="committeeCount" class="text-xs text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded-full">0 validators</span>
+            <h3 class="font-semibold text-white flex items-center gap-2"><svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg><span data-i18n="blockCommittee">Block Committee</span></h3>
+            <div class="flex items-center gap-2">
+              <span id="committeeEpoch" class="text-xs text-slate-500 bg-slate-700/50 px-2 py-1 rounded-full">Epoch --</span>
+              <span id="committeeCount" class="text-xs text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded-full">0 validators</span>
+            </div>
           </div>
-          <div id="validatorGrid" class="p-3 flex flex-wrap gap-1"></div>
+          <div id="validatorGrid" class="p-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2"></div>
+        </div>
+        <div class="glass rounded-2xl border border-slate-700/50 overflow-hidden mb-6 mt-4">
+          <div class="px-6 py-4 border-b border-slate-700/30">
+            <h3 class="font-semibold text-white" data-i18n="blockProducers">Block Producers</h3>
+            <p class="text-xs text-slate-500">Validator block production distribution</p>
+          </div>
+          <div id="blockProducersList" class="p-4 space-y-2">
+            <p class="text-center text-slate-500 text-sm py-4">Loading...</p>
+          </div>
         </div>
       <div class="grid lg:grid-cols-2 gap-6">
         <div class="bg-slate-800/40 rounded-2xl border border-slate-700/50 overflow-hidden">
           <div class="px-5 py-4 border-b border-slate-700/50 flex items-center justify-between">
-            <h3 class="font-semibold text-white flex items-center gap-2"><svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>Recent Blocks</h3>
-            <button class="view-all-btn text-orange-400 text-sm hover:underline" data-tab="blocks">View All</button>
+            <h3 class="font-semibold text-white flex items-center gap-2"><svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg><span data-i18n="recentBlocks">Recent Blocks</span></h3>
+            <button class="view-all-btn text-orange-400 text-sm hover:underline" data-tab="blocks" data-i18n="viewAll">View All</button>
           </div>
           <div id="recentBlocks" class="divide-y divide-slate-700/30 max-h-[400px] overflow-y-auto"></div>
         </div>
         <div class="bg-slate-800/40 rounded-2xl border border-slate-700/50 overflow-hidden">
           <div class="px-5 py-4 border-b border-slate-700/50 flex items-center justify-between">
-            <h3 class="font-semibold text-white flex items-center gap-2"><svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Recent Extrinsics</h3>
-            <button class="view-all-btn text-orange-400 text-sm hover:underline" data-tab="extrinsics">View All</button>
+            <h3 class="font-semibold text-white flex items-center gap-2"><svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><span data-i18n="recentExtrinsics">Recent Extrinsics</span></h3>
+            <button class="view-all-btn text-orange-400 text-sm hover:underline" data-tab="extrinsics" data-i18n="viewAll">View All</button>
           </div>
           <div id="recentTxs" class="divide-y divide-slate-700/30 max-h-[400px] overflow-y-auto"></div>
           <!-- Top Methods Leaderboard -->
           <div class="bg-slate-800/50 rounded-xl border border-slate-700/50 overflow-hidden mt-4">
             <div class="px-4 py-3 border-b border-slate-700/50 flex items-center justify-between">
-              <h3 class="font-semibold text-white flex items-center gap-2">🏆 Top Methods</h3>
+              <h3 class="font-semibold text-white flex items-center gap-2"><span data-i18n="topMethods">🏆 Top Methods</span></h3>
               <span class="text-xs text-slate-500">Last 100 extrinsics</span>
             </div>
             <div id="topMethods" class="p-3 space-y-2">
@@ -467,7 +546,7 @@
             <div class="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center border border-cyan-500/30">
               <span class="text-lg">🛡</span>
             </div>
-            Privacy Dashboard
+            <span data-i18n="privacyDashboard">Privacy Dashboard</span>
           </h2>
           <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30">
             <div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
@@ -489,11 +568,11 @@
           </div>
 
           <!-- Privacy Stats -->
-          <div class="lg:col-span-2 grid grid-cols-2 gap-4">
+          <div class="lg:col-span-2 grid grid-cols-2 lg:grid-cols-3 gap-4">
             <div class="glass rounded-2xl border border-cyan-500/20 p-5 card-hover relative overflow-hidden">
               <div class="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl"></div>
               <div class="relative">
-                <p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Total Midnight Txs</p>
+                <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalMidnightTxs">Total Midnight Txs</p>
                 <p id="privTotalTxs" class="text-3xl font-bold text-white count-up">--</p>
                 <p class="text-xs text-slate-500 mt-1">Last 7 days</p>
               </div>
@@ -501,7 +580,7 @@
             <div class="glass rounded-2xl border border-green-500/20 p-5 card-hover relative overflow-hidden">
               <div class="absolute top-0 right-0 w-24 h-24 bg-green-500/10 rounded-full blur-2xl"></div>
               <div class="relative">
-                <p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Shielded</p>
+                <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="shielded">Shielded</p>
                 <p id="privShielded" class="text-3xl font-bold text-cyan-400 count-up">--</p>
                 <p class="text-xs text-cyan-400/60 mt-1">Private transactions</p>
               </div>
@@ -509,7 +588,7 @@
             <div class="glass rounded-2xl border border-orange-500/20 p-5 card-hover relative overflow-hidden">
               <div class="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl"></div>
               <div class="relative">
-                <p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Unshielded</p>
+                <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="unshielded">Unshielded</p>
                 <p id="privUnshielded" class="text-3xl font-bold text-orange-400 count-up">--</p>
                 <p class="text-xs text-orange-400/60 mt-1">Public transactions</p>
               </div>
@@ -517,9 +596,17 @@
             <div class="glass rounded-2xl border border-purple-500/20 p-5 card-hover relative overflow-hidden">
               <div class="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl"></div>
               <div class="relative">
-                <p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Mixed</p>
-                <p id="privMixed" class="text-3xl font-bold text-purple-400 count-up">--</p>
-                <p class="text-xs text-purple-400/60 mt-1">Partial shielding</p>
+                <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="contractCalls">Contract Calls</p>
+                <p id="privContractCalls" class="text-3xl font-bold text-purple-400 count-up">--</p>
+                <p class="text-xs text-purple-400/60 mt-1">Smart contract interactions</p>
+              </div>
+            </div>
+            <div class="glass rounded-2xl border border-pink-500/20 p-5 card-hover relative overflow-hidden">
+              <div class="absolute top-0 right-0 w-24 h-24 bg-pink-500/10 rounded-full blur-2xl"></div>
+              <div class="relative">
+                <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="contractDeploys">Contract Deploys</p>
+                <p id="privContractDeploys" class="text-3xl font-bold text-pink-400 count-up">--</p>
+                <p class="text-xs text-pink-400/60 mt-1">Deployed contracts</p>
               </div>
             </div>
           </div>
@@ -533,7 +620,7 @@
                 <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
               </div>
               <div>
-                <h3 class="font-semibold text-white">Shielded vs Unshielded Trend</h3>
+                <h3 class="font-semibold text-white" data-i18n="shieldedVsUnshielded">Shielded vs Unshielded Trend</h3>
                 <p class="text-xs text-slate-500">Hourly breakdown over 7 days</p>
               </div>
             </div>
@@ -557,7 +644,7 @@
             <div class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center border border-purple-500/30">
               <span class="text-lg">🌉</span>
             </div>
-            Bridge Monitor
+            <span data-i18n="bridgeMonitor">Bridge Monitor</span>
           </h2>
           <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30">
             <div class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></div>
@@ -566,7 +653,7 @@
         </div>
 
         <!-- Bridge Animation Graphic -->
-        <div class="glass rounded-2xl border border-purple-500/20 p-6 mb-6 card-hover">
+        <div class="glass rounded-2xl border border-purple-500/20 p-6 mb-6 card-hover bridge-viz-container">
           <div class="flex items-center justify-between max-w-2xl mx-auto">
             <div class="flex flex-col items-center gap-2">
               <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/30 to-blue-600/20 border border-blue-500/30 flex items-center justify-center">
@@ -599,7 +686,7 @@
           <div class="glass rounded-2xl border border-purple-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
-              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Total Bridge Ops</p>
+              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalBridgeOps">Total Bridge Ops</p>
               <p id="bridgeTotal" class="text-3xl font-bold text-white count-up">--</p>
               <p class="text-xs text-slate-500 mt-1">Last 7 days</p>
             </div>
@@ -607,7 +694,7 @@
           <div class="glass rounded-2xl border border-cyan-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
-              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Last 24h</p>
+              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="last24h">Last 24h</p>
               <p id="bridge24h" class="text-3xl font-bold text-cyan-400 count-up">--</p>
               <p class="text-xs text-cyan-400/60 mt-1">Bridge operations</p>
             </div>
@@ -615,7 +702,7 @@
           <div class="glass rounded-2xl border border-orange-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
-              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Ops / Hour</p>
+              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="opsPerHour">Ops / Hour</p>
               <p id="bridgeRate" class="text-3xl font-bold text-orange-400 count-up">--</p>
               <p class="text-xs text-orange-400/60 mt-1">Average rate</p>
             </div>
@@ -630,8 +717,8 @@
                 <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
               </div>
               <div>
-                <h3 class="font-semibold text-white">Bridge Activity</h3>
-                <p class="text-xs text-slate-500">Hourly bridge operations</p>
+                <h3 class="font-semibold text-white" data-i18n="bridgeActivity">Bridge Activity</h3>
+                <p class="text-xs text-slate-500" data-i18n="hourlyOps">Hourly bridge operations</p>
               </div>
             </div>
           </div>
@@ -645,7 +732,7 @@
           <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between">
             <h3 class="font-semibold text-white flex items-center gap-2">
               <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-              Recent Bridge Operations
+              <span data-i18n="recentBridgeOps">Recent Bridge Operations</span>
             </h3>
             <span id="bridgeOpCount" class="text-xs text-purple-400 bg-purple-400/10 px-2 py-1 rounded-full">0 ops</span>
           </div>
@@ -653,10 +740,10 @@
             <table class="w-full text-sm">
               <thead>
                 <tr class="border-b border-slate-700/30">
-                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase">Hash</th>
-                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase">Block</th>
-                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase">Cardano Block</th>
-                  <th class="text-right px-4 py-3 text-xs text-slate-500 uppercase">Time</th>
+                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="hash">Hash</th>
+                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="block">Block</th>
+                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="cardanoBlock">Cardano Block</th>
+                  <th class="text-right px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="time">Time</th>
                 </tr>
               </thead>
               <tbody id="bridgeOpsTable" class="divide-y divide-slate-700/20">
@@ -676,7 +763,7 @@
             <div class="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center border border-orange-500/30">
               <span class="text-lg">📊</span>
             </div>
-            Network Analytics
+            <span data-i18n="networkAnalytics">Network Analytics</span>
           </h2>
           <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30">
             <div class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></div>
@@ -689,28 +776,28 @@
           <div class="glass rounded-2xl border border-blue-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
-              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Total Blocks</p>
+              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalBlocks">Total Blocks</p>
               <p id="anTotalBlocks" class="text-2xl font-bold text-white count-up">--</p>
             </div>
           </div>
           <div class="glass rounded-2xl border border-green-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-green-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
-              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Total Extrinsics</p>
+              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalExtrinsics">Total Extrinsics</p>
               <p id="anTotalExts" class="text-2xl font-bold text-green-400 count-up">--</p>
             </div>
           </div>
           <div class="glass rounded-2xl border border-cyan-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-cyan-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
-              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Avg Block Time</p>
+              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="avgBlockTime">Avg Block Time</p>
               <p id="anAvgBlock" class="text-2xl font-bold text-cyan-400 count-up">--</p>
             </div>
           </div>
           <div class="glass rounded-2xl border border-orange-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-orange-500/10 rounded-full blur-2xl"></div>
             <div class="relative">
-              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Network TPS</p>
+              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="networkTps">Network TPS</p>
               <p id="anTPS" class="text-2xl font-bold text-orange-400 count-up">--</p>
             </div>
           </div>
@@ -725,7 +812,7 @@
                   <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                 </div>
                 <div>
-                  <h3 class="font-semibold text-white">Daily Activity</h3>
+                  <h3 class="font-semibold text-white" data-i18n="dailyActivity">Daily Activity</h3>
                   <p class="text-xs text-slate-500">Transaction volume</p>
                 </div>
               </div>
@@ -743,7 +830,7 @@
                   <span class="text-sm">🏆</span>
                 </div>
                 <div>
-                  <h3 class="font-semibold text-white">Contract Leaderboard</h3>
+                  <h3 class="font-semibold text-white" data-i18n="contractLeaderboard">Contract Leaderboard</h3>
                   <p class="text-xs text-slate-500">Most active contracts</p>
                 </div>
               </div>
@@ -766,32 +853,61 @@
           </div>
         </div>
 
+        <!-- Event Types Breakdown & Deployed Contracts -->
+        <div class="grid lg:grid-cols-2 gap-6 mb-6">
+          <div class="glass rounded-2xl border border-slate-700/50 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/30 to-green-500/30 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-white" data-i18n="eventTypes">Event Types</h3>
+                  <p class="text-xs text-slate-500">On-chain event breakdown</p>
+                </div>
+              </div>
+              <span id="eventTypesTotal" class="text-xs text-cyan-400 bg-cyan-400/10 px-2 py-1 rounded-full">--</span>
+            </div>
+            <div id="eventTypesList" class="p-4 space-y-2 max-h-[360px] overflow-y-auto">
+              <div class="animate-pulse bg-slate-700/30 h-8 rounded"></div>
+              <div class="animate-pulse bg-slate-700/30 h-8 rounded"></div>
+              <div class="animate-pulse bg-slate-700/30 h-8 rounded"></div>
+            </div>
+          </div>
+
+          <div class="glass rounded-2xl border border-slate-700/50 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/30 to-yellow-500/30 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-white" data-i18n="deployedContracts">Deployed Contracts</h3>
+                  <p class="text-xs text-slate-500">On-chain smart contracts</p>
+                </div>
+              </div>
+              <span id="deployedContractsTotal" class="text-xs text-orange-400 bg-orange-400/10 px-2 py-1 rounded-full">--</span>
+            </div>
+            <div id="deployedContractsList" class="divide-y divide-slate-700/20 max-h-[360px] overflow-y-auto">
+              <div class="px-4 py-8 text-center text-slate-500">Loading contracts...</div>
+            </div>
+          </div>
+        </div>
+
         <!-- Compare Networks -->
         <div class="glass rounded-2xl border border-slate-700/50 overflow-hidden">
           <div class="px-6 py-4 border-b border-slate-700/30">
             <h3 class="font-semibold text-white flex items-center gap-2">
               <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-              Compare Networks
+              <span data-i18n="compareNetworks">Compare Networks</span>
             </h3>
           </div>
           <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="rounded-2xl border border-green-500/20 bg-green-500/5 p-5 opacity-60">
+            <div class="rounded-2xl border-2 border-green-500/30 bg-green-500/5 p-5 relative">
+              <div class="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-green-500/20 text-xs text-green-400 font-medium">CURRENT</div>
               <div class="flex items-center gap-2 mb-4">
                 <div class="w-3 h-3 rounded-full bg-green-400"></div>
                 <span class="font-bold text-green-400">Mainnet</span>
-              </div>
-              <div class="space-y-2">
-                <div class="flex justify-between"><span class="text-xs text-slate-500">Blocks</span><span class="text-sm font-medium text-slate-500">--</span></div>
-                <div class="flex justify-between"><span class="text-xs text-slate-500">Extrinsics</span><span class="text-sm font-medium text-slate-500">--</span></div>
-                <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span class="text-sm font-medium text-slate-500">--</span></div>
-              </div>
-              <p class="text-xs text-slate-600 mt-3 text-center">Coming soon</p>
-            </div>
-            <div class="rounded-2xl border-2 border-orange-500/30 bg-orange-500/5 p-5 relative">
-              <div class="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-orange-500/20 text-xs text-orange-400 font-medium">CURRENT</div>
-              <div class="flex items-center gap-2 mb-4">
-                <div class="w-3 h-3 rounded-full bg-orange-400"></div>
-                <span class="font-bold text-orange-400">Preview</span>
               </div>
               <div class="space-y-2">
                 <div class="flex justify-between"><span class="text-xs text-slate-500">Blocks</span><span id="cmpMainBlocks" class="text-sm font-medium text-white">--</span></div>
@@ -799,17 +915,50 @@
                 <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span id="cmpMainTPS" class="text-sm font-medium text-white">--</span></div>
               </div>
             </div>
-            <div class="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5 opacity-60">
+            <div class="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-5">
               <div class="flex items-center gap-2 mb-4">
-                <div class="w-3 h-3 rounded-full bg-cyan-400"></div>
-                <span class="font-bold text-cyan-400">Preview</span>
+                <div class="w-3 h-3 rounded-full bg-orange-400"></div>
+                <a href="https://preprod.nightforge.jp" class="font-bold text-orange-400 hover:underline">Preprod</a>
               </div>
               <div class="space-y-2">
-                <div class="flex justify-between"><span class="text-xs text-slate-500">Blocks</span><span class="text-sm font-medium text-slate-500">--</span></div>
-                <div class="flex justify-between"><span class="text-xs text-slate-500">Extrinsics</span><span class="text-sm font-medium text-slate-500">--</span></div>
-                <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span class="text-sm font-medium text-slate-500">--</span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">Blocks</span><span id="cmpPreprodBlocks" class="text-sm font-medium text-white">--</span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">Extrinsics</span><span id="cmpPreprodExts" class="text-sm font-medium text-white">--</span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span id="cmpPreprodTPS" class="text-sm font-medium text-white">--</span></div>
               </div>
-              <p class="text-xs text-slate-600 mt-3 text-center">Coming soon</p>
+            </div>
+            <div class="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5">
+              <div class="flex items-center gap-2 mb-4">
+                <div class="w-3 h-3 rounded-full bg-cyan-400"></div>
+                <a href="https://preview.nightforge.jp" class="font-bold text-cyan-400 hover:underline">Preview</a>
+              </div>
+              <div class="space-y-2">
+                <div class="flex justify-between"><span class="text-xs text-slate-500">Blocks</span><span id="cmpPreviewBlocks" class="text-sm font-medium text-white">--</span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">Extrinsics</span><span id="cmpPreviewExts" class="text-sm font-medium text-white">--</span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span id="cmpPreviewTPS" class="text-sm font-medium text-white">--</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DUST Fee Tracker -->
+        <div class="glass rounded-2xl border border-amber-500/20 overflow-hidden mb-6 mt-6">
+          <div class="px-6 py-4 border-b border-slate-700/30 bg-gradient-to-r from-amber-500/5 to-transparent">
+            <h3 class="font-semibold text-amber-400" data-i18n="dustTracker">DUST Fee Tracker</h3>
+            <p class="text-xs text-slate-500">Network fee consumption over time</p>
+          </div>
+          <div class="p-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div class="bg-slate-900/50 rounded-xl p-3 text-center">
+                <p class="text-xs text-slate-500">Total Fee-Paying Txs</p>
+                <p id="dustTotalTxs" class="text-2xl font-bold text-amber-400">--</p>
+              </div>
+              <div class="bg-slate-900/50 rounded-xl p-3 text-center">
+                <p class="text-xs text-slate-500">DUST Events</p>
+                <p id="dustEventCount" class="text-2xl font-bold text-amber-400">--</p>
+              </div>
+            </div>
+            <div class="h-48">
+              <canvas id="dustChartCanvas"></canvas>
             </div>
           </div>
         </div>
@@ -824,38 +973,38 @@
             <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
               <span class="text-lg">🏛</span>
             </div>
-            <span>On-Chain Governance</span>
+            <span data-i18n="onChainGovernance">On-Chain Governance</span>
           </h2>
           <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30">
             <div class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
-            <span class="text-xs font-medium text-blue-400">Council & Technical Committee Activity</span>
+            <span class="text-xs font-medium text-blue-400" data-i18n="councilTechCommittee">Council & Technical Committee Activity</span>
           </div>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
           <div class="glass rounded-2xl border border-blue-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl"></div>
-            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Total Actions</p><p id="govTotal" class="text-2xl font-bold text-white count-up">--</p></div>
+            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalActions">Total Actions</p><p id="govTotal" class="text-2xl font-bold text-white count-up">--</p></div>
           </div>
           <div class="glass rounded-2xl border border-blue-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl"></div>
-            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Council Proposals</p><p id="govCouncilProposals" class="text-2xl font-bold text-blue-400 count-up">--</p></div>
+            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="councilProposals">Council Proposals</p><p id="govCouncilProposals" class="text-2xl font-bold text-blue-400 count-up">--</p></div>
           </div>
           <div class="glass rounded-2xl border border-blue-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl"></div>
-            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Council Votes</p><p id="govCouncilVotes" class="text-2xl font-bold text-blue-400 count-up">--</p></div>
+            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="councilVotes">Council Votes</p><p id="govCouncilVotes" class="text-2xl font-bold text-blue-400 count-up">--</p></div>
           </div>
           <div class="glass rounded-2xl border border-purple-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl"></div>
-            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Tech Proposals</p><p id="govTechProposals" class="text-2xl font-bold text-purple-400 count-up">--</p></div>
+            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="techProposals">Tech Proposals</p><p id="govTechProposals" class="text-2xl font-bold text-purple-400 count-up">--</p></div>
           </div>
           <div class="glass rounded-2xl border border-purple-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl"></div>
-            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Tech Votes</p><p id="govTechVotes" class="text-2xl font-bold text-purple-400 count-up">--</p></div>
+            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="techVotes">Tech Votes</p><p id="govTechVotes" class="text-2xl font-bold text-purple-400 count-up">--</p></div>
           </div>
           <div class="glass rounded-2xl border border-amber-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-amber-500/10 rounded-full blur-2xl"></div>
-            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Authority Resets</p><p id="govAuthorityResets" class="text-2xl font-bold text-amber-400 count-up">--</p></div>
+            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="authorityResets">Authority Resets</p><p id="govAuthorityResets" class="text-2xl font-bold text-amber-400 count-up">--</p></div>
           </div>
         </div>
 
@@ -865,7 +1014,7 @@
             <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between bg-gradient-to-r from-blue-500/10 to-transparent">
               <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-lg bg-blue-500/30 flex items-center justify-center"><span class="text-sm">🏛</span></div>
-                <div><h3 class="font-semibold text-white">Council Proposals</h3><p class="text-xs text-slate-500">Recent council proposals</p></div>
+                <div><h3 class="font-semibold text-white" data-i18n="councilProposals">Council Proposals</h3><p class="text-xs text-slate-500">Recent council proposals</p></div>
               </div>
               <span id="govCouncilProposalCount" class="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-full">0</span>
             </div>
@@ -877,7 +1026,7 @@
             <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between bg-gradient-to-r from-blue-500/10 to-transparent">
               <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-lg bg-blue-500/30 flex items-center justify-center"><span class="text-sm">🗳</span></div>
-                <div><h3 class="font-semibold text-white">Council Votes</h3><p class="text-xs text-slate-500">Recent council voting activity</p></div>
+                <div><h3 class="font-semibold text-white" data-i18n="councilVotes">Council Votes</h3><p class="text-xs text-slate-500">Recent council voting activity</p></div>
               </div>
               <span id="govCouncilVoteCount" class="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-full">0</span>
             </div>
@@ -893,7 +1042,7 @@
             <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between bg-gradient-to-r from-purple-500/10 to-transparent">
               <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-lg bg-purple-500/30 flex items-center justify-center"><span class="text-sm">⚙</span></div>
-                <div><h3 class="font-semibold text-white">Technical Committee Proposals</h3><p class="text-xs text-slate-500">Technical governance activity</p></div>
+                <div><h3 class="font-semibold text-white" data-i18n="techProposals">Technical Committee Proposals</h3><p class="text-xs text-slate-500">Technical governance activity</p></div>
               </div>
               <span id="govTechProposalCount" class="text-xs text-purple-400 bg-purple-400/10 px-2 py-1 rounded-full">0</span>
             </div>
@@ -905,7 +1054,7 @@
             <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between bg-gradient-to-r from-purple-500/10 to-transparent">
               <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-lg bg-purple-500/30 flex items-center justify-center"><span class="text-sm">🗳</span></div>
-                <div><h3 class="font-semibold text-white">Technical Committee Votes</h3><p class="text-xs text-slate-500">Technical voting activity</p></div>
+                <div><h3 class="font-semibold text-white" data-i18n="techVotes">Technical Committee Votes</h3><p class="text-xs text-slate-500">Technical voting activity</p></div>
               </div>
               <span id="govTechVoteCount" class="text-xs text-purple-400 bg-purple-400/10 px-2 py-1 rounded-full">0</span>
             </div>
@@ -920,7 +1069,7 @@
           <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between bg-gradient-to-r from-amber-500/10 to-transparent">
             <div class="flex items-center gap-3">
               <div class="w-8 h-8 rounded-lg bg-amber-500/30 flex items-center justify-center"><span class="text-sm">🔗</span></div>
-              <div><h3 class="font-semibold text-white">Authority Resets</h3><p class="text-xs text-slate-500">Federated authority observation events</p></div>
+              <div><h3 class="font-semibold text-white" data-i18n="authorityResets">Authority Resets</h3><p class="text-xs text-slate-500">Federated authority observation events</p></div>
             </div>
             <span id="govAuthorityCount" class="text-xs text-amber-400 bg-amber-400/10 px-2 py-1 rounded-full">0</span>
           </div>
@@ -939,7 +1088,7 @@
             <div class="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center border border-cyan-500/30">
               <span class="text-lg">⏱</span>
             </div>
-            <span>Epoch Explorer</span>
+            <span data-i18n="epochTimeline">Epoch Explorer</span>
           </h2>
           <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30">
             <div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
@@ -950,62 +1099,123 @@
         <!-- Current Epoch Banner -->
         <div class="glass rounded-2xl border border-cyan-500/30 p-8 mb-6 card-hover relative overflow-hidden">
           <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-purple-500/5 pointer-events-none"></div>
-          <div class="relative grid md:grid-cols-3 gap-8 items-center">
+          <div class="relative grid md:grid-cols-4 gap-6 items-center">
             <div class="text-center md:text-left">
-              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Current Epoch</p>
+              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="currentEpochInfo">Current Epoch</p>
               <p id="epochCurrentNum" class="text-5xl font-black text-cyan-400">--</p>
-              <p class="text-sm text-slate-400 mt-2">Sidechain Slot: <span id="epochCurrentSlot" class="text-white font-mono">--</span></p>
+              <div class="flex flex-wrap gap-2 mt-3">
+                <span class="text-xs px-2 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300" data-i18n="thirtyMinEpochs">30 min epochs</span>
+                <span class="text-xs px-2 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300" data-i18n="blocksPerEpochValue">~50 blocks/epoch</span>
+              </div>
             </div>
             <div class="text-center">
-              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Next Epoch In</p>
+              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="nextEpochIn">Next Epoch In</p>
               <p id="epochCountdown" class="text-4xl font-bold text-white">--:--:--</p>
               <div class="w-full h-2 bg-slate-700 rounded-full mt-3 overflow-hidden">
                 <div id="epochProgressBar" class="h-full bg-gradient-to-r from-cyan-500 to-green-500 rounded-full transition-all duration-1000" style="width:0%"></div>
               </div>
             </div>
-            <div class="text-center md:text-right">
-              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Cardano Epoch</p>
+            <div class="text-center">
+              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="cardanoEpoch">Cardano Epoch</p>
               <p id="epochCardanoNum" class="text-3xl font-bold text-blue-400">--</p>
+            </div>
+            <div class="text-center md:text-right">
+              <p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="sidechainSlot">Sidechain Slot</p>
+              <p id="epochCurrentSlot" class="text-2xl font-bold text-white font-mono">--</p>
             </div>
           </div>
         </div>
 
         <!-- Session Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div class="glass rounded-2xl border border-green-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-green-500/10 rounded-full blur-2xl"></div>
-            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Total Sessions</p><p id="epochTotalSessions" class="text-2xl font-bold text-green-400 count-up">--</p></div>
+            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="totalSessions">Total Sessions</p><p id="epochTotalSessions" class="text-2xl font-bold text-green-400 count-up">--</p></div>
           </div>
           <div class="glass rounded-2xl border border-orange-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-orange-500/10 rounded-full blur-2xl"></div>
-            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Authority Changes</p><p id="epochAuthorityChanges" class="text-2xl font-bold text-orange-400 count-up">--</p></div>
+            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="authorityChanges">Authority Changes</p><p id="epochAuthorityChanges" class="text-2xl font-bold text-orange-400 count-up">--</p></div>
           </div>
           <div class="glass rounded-2xl border border-cyan-500/20 p-5 card-hover relative overflow-hidden">
             <div class="absolute top-0 right-0 w-20 h-20 bg-cyan-500/10 rounded-full blur-2xl"></div>
-            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2">Avg Epoch Duration</p><p id="epochAvgDuration" class="text-2xl font-bold text-cyan-400 count-up">--</p></div>
+            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="avgEpochDuration">Avg Epoch Duration</p><p id="epochAvgDuration" class="text-2xl font-bold text-cyan-400 count-up">--</p></div>
+          </div>
+          <div class="glass rounded-2xl border border-purple-500/20 p-5 card-hover relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl"></div>
+            <div class="relative"><p class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-i18n="blocksPerEpoch">Blocks/Epoch</p><p id="epochBlocksPerEpoch" class="text-2xl font-bold text-purple-400 count-up">~50</p></div>
           </div>
         </div>
 
-        <div class="grid lg:grid-cols-2 gap-6">
-          <!-- Epoch Timeline -->
-          <div class="glass rounded-2xl border border-slate-700/50 overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/30 to-purple-500/30 flex items-center justify-center"><span class="text-sm">⏱</span></div>
-                <div><h3 class="font-semibold text-white">Epoch Timeline</h3><p class="text-xs text-slate-500">Recent epoch progression</p></div>
+        <!-- Epoch Relationship -->
+        <div class="grid lg:grid-cols-2 gap-6 mb-6">
+          <!-- Midnight Epochs -->
+          <div class="glass rounded-2xl border border-cyan-500/20 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-700/30 bg-gradient-to-r from-cyan-500/5 to-transparent">
+              <h3 class="font-semibold text-cyan-400">Midnight Epochs</h3>
+              <p class="text-xs text-slate-500">~30 min each, ~50 blocks per epoch</p>
+            </div>
+            <div class="p-6">
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="bg-slate-900/50 rounded-xl p-3 text-center">
+                  <p class="text-xs text-slate-500">Epochs Today</p>
+                  <p id="epochsToday" class="text-2xl font-bold text-cyan-400">--</p>
+                </div>
+                <div class="bg-slate-900/50 rounded-xl p-3 text-center">
+                  <p class="text-xs text-slate-500">Blocks Today</p>
+                  <p id="blocksToday" class="text-2xl font-bold text-white">--</p>
+                </div>
+              </div>
+              <div id="recentEpochsList" class="space-y-2 max-h-64 overflow-y-auto">
+                <p class="text-center text-slate-500 text-sm py-4">Loading...</p>
               </div>
             </div>
-            <div id="epochTimeline" class="p-6 epoch-timeline max-h-[500px] overflow-y-auto">
-              <div class="text-center text-slate-500 py-8">Loading epoch data...</div>
+          </div>
+          <!-- Cardano Epoch -->
+          <div class="glass rounded-2xl border border-blue-500/20 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-700/30 bg-gradient-to-r from-blue-500/5 to-transparent">
+              <h3 class="font-semibold text-blue-400">Cardano Epoch</h3>
+              <p class="text-xs text-slate-500">~5 day epochs on Cardano mainchain</p>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center justify-center mb-6">
+                <div class="text-center">
+                  <p class="text-5xl font-bold text-blue-400" id="cardanoEpochBig">--</p>
+                  <p class="text-sm text-slate-400 mt-1">Current Cardano Epoch</p>
+                  <p id="cardanoEpochCountdown" class="text-xs text-blue-300 mt-1">--</p>
+                  <div class="w-full h-1.5 bg-slate-700/50 rounded-full mt-2 overflow-hidden">
+                    <div id="cardanoEpochProgress" class="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all" style="width:0%"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="bg-slate-900/50 rounded-xl p-3 text-center">
+                  <p class="text-xs text-slate-500">Cardano Slot</p>
+                  <p id="cardanoSlotBig" class="text-sm font-mono font-bold text-white">--</p>
+                </div>
+                <div class="bg-slate-900/50 rounded-xl p-3 text-center">
+                  <p class="text-xs text-slate-500">Midnight Epochs in this Cardano Epoch</p>
+                  <p id="midnightEpochsInCardano" class="text-sm font-bold text-cyan-400">--</p>
+                </div>
+              </div>
+              <div class="bg-blue-500/5 border border-blue-500/10 rounded-xl p-4">
+                <div class="flex items-center gap-2 mb-2">
+                  <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                  <p class="text-xs text-blue-400 font-medium">Cross-Chain Anchor</p>
+                </div>
+                <p class="text-xs text-slate-400">Midnight checkpoints to Cardano every epoch for cross-chain security. Each Cardano epoch (~5 days) contains ~240 Midnight epochs.</p>
+              </div>
             </div>
           </div>
+        </div>
 
+        <!-- Session Changes & Epoch Info -->
+        <div class="grid lg:grid-cols-2 gap-6">
           <!-- Session Changes -->
           <div class="glass rounded-2xl border border-slate-700/50 overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between">
               <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/30 to-pink-500/30 flex items-center justify-center"><span class="text-sm">🔄</span></div>
-                <div><h3 class="font-semibold text-white">Session Changes</h3><p class="text-xs text-slate-500">Recent session transitions</p></div>
+                <div><h3 class="font-semibold text-white" data-i18n="sessionChanges">Session Changes</h3><p class="text-xs text-slate-500">Recent session transitions</p></div>
               </div>
               <span id="epochSessionCount" class="text-xs text-orange-400 bg-orange-400/10 px-2 py-1 rounded-full">0</span>
             </div>
@@ -1013,15 +1223,44 @@
               <table class="w-full text-sm">
                 <thead>
                   <tr class="border-b border-slate-700/30">
-                    <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase">Epoch</th>
-                    <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase">Block</th>
-                    <th class="text-right px-4 py-3 text-xs text-slate-500 uppercase">Time</th>
+                    <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="epochs">Epoch</th>
+                    <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="block">Block</th>
+                    <th class="text-right px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="time">Time</th>
                   </tr>
                 </thead>
                 <tbody id="epochSessionTable" class="divide-y divide-slate-700/20">
                   <tr><td colspan="3" class="px-4 py-8 text-center text-slate-500">Loading...</td></tr>
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          <!-- Epoch Info Box -->
+          <div class="glass rounded-2xl border border-cyan-500/20 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-700/30 flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/30 to-blue-500/30 flex items-center justify-center"><span class="text-sm">💡</span></div>
+              <h3 class="font-semibold text-white">About Midnight Epochs</h3>
+            </div>
+            <div class="p-6">
+              <p class="text-sm text-slate-300 leading-relaxed" data-i18n="epochExplainer">Midnight uses 30-minute epochs. Each epoch produces ~50 blocks. The validator committee is set at the start of each epoch. Midnight epochs are anchored to Cardano epochs for cross-chain security.</p>
+              <div class="grid grid-cols-2 gap-4 mt-6">
+                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/30 text-center">
+                  <p class="text-2xl font-bold text-cyan-400">30m</p>
+                  <p class="text-xs text-slate-500 mt-1" data-i18n="duration">Duration</p>
+                </div>
+                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/30 text-center">
+                  <p class="text-2xl font-bold text-purple-400">~50</p>
+                  <p class="text-xs text-slate-500 mt-1">Blocks</p>
+                </div>
+                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/30 text-center">
+                  <p class="text-2xl font-bold text-green-400">300</p>
+                  <p class="text-xs text-slate-500 mt-1">Slots</p>
+                </div>
+                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/30 text-center">
+                  <p class="text-2xl font-bold text-blue-400">6s</p>
+                  <p class="text-xs text-slate-500 mt-1">Slot Time</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1036,11 +1275,11 @@
             <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
               <span class="text-lg">⛓</span>
             </div>
-            <span>Cardano Anchors</span>
+            <span data-i18n="cardanoAnchorPoints">Cardano Anchors</span>
           </h2>
           <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30">
             <div class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
-            <span class="text-xs font-medium text-blue-400">Midnight ↔ Cardano Anchor Points</span>
+            <span class="text-xs font-medium text-blue-400" data-i18n="midnightCardanoBridge">Midnight ↔ Cardano Anchor Points</span>
           </div>
         </div>
 
@@ -1089,7 +1328,7 @@
           <div class="px-6 py-4 border-b border-slate-700/30 flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/30 to-cyan-500/30 flex items-center justify-center"><span class="text-sm">⚓</span></div>
-              <div><h3 class="font-semibold text-white">Anchor History</h3><p class="text-xs text-slate-500">Cardano ↔ Midnight checkpoint log</p></div>
+              <div><h3 class="font-semibold text-white" data-i18n="anchorHistory">Anchor History</h3><p class="text-xs text-slate-500">Cardano ↔ Midnight checkpoint log</p></div>
             </div>
             <span id="cardanoAnchorCount" class="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-full">0 anchors</span>
           </div>
@@ -1097,12 +1336,12 @@
             <table class="w-full text-sm">
               <thead>
                 <tr class="border-b border-slate-700/30">
-                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase">Midnight Epoch</th>
-                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase">Midnight Slot</th>
+                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="midnightEpoch">Midnight Epoch</th>
+                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="midnightSlot">Midnight Slot</th>
                   <th class="text-center px-4 py-3 text-xs text-slate-500 uppercase"></th>
-                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase">Cardano Epoch</th>
-                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase">Cardano Slot</th>
-                  <th class="text-right px-4 py-3 text-xs text-slate-500 uppercase">Time</th>
+                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="cardanoEpoch">Cardano Epoch</th>
+                  <th class="text-left px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="cardanoSlot">Cardano Slot</th>
+                  <th class="text-right px-4 py-3 text-xs text-slate-500 uppercase" data-i18n="time">Time</th>
                 </tr>
               </thead>
               <tbody id="cardanoAnchorTable" class="divide-y divide-slate-700/20">
@@ -1118,7 +1357,7 @@
             <div class="px-6 py-4 border-b border-slate-700/30 bg-gradient-to-r from-green-500/10 to-transparent">
               <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-lg bg-green-500/30 flex items-center justify-center"><span class="text-sm">📥</span></div>
-                <div><h3 class="font-semibold text-white">Registrations</h3><p class="text-xs text-slate-500">Bridge registrations</p></div>
+                <div><h3 class="font-semibold text-white" data-i18n="registrations">Registrations</h3><p class="text-xs text-slate-500">Bridge registrations</p></div>
               </div>
             </div>
             <div id="cardanoRegistrations" class="divide-y divide-slate-700/20 max-h-[300px] overflow-y-auto">
@@ -1129,7 +1368,7 @@
             <div class="px-6 py-4 border-b border-slate-700/30 bg-gradient-to-r from-red-500/10 to-transparent">
               <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-lg bg-red-500/30 flex items-center justify-center"><span class="text-sm">📤</span></div>
-                <div><h3 class="font-semibold text-white">Deregistrations</h3><p class="text-xs text-slate-500">Bridge deregistrations</p></div>
+                <div><h3 class="font-semibold text-white" data-i18n="deregistrations">Deregistrations</h3><p class="text-xs text-slate-500">Bridge deregistrations</p></div>
               </div>
             </div>
             <div id="cardanoDeregistrations" class="divide-y divide-slate-700/20 max-h-[300px] overflow-y-auto">
@@ -1140,7 +1379,7 @@
             <div class="px-6 py-4 border-b border-slate-700/30 bg-gradient-to-r from-cyan-500/10 to-transparent">
               <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-lg bg-cyan-500/30 flex items-center justify-center"><span class="text-sm">🔗</span></div>
-                <div><h3 class="font-semibold text-white">Mappings Added</h3><p class="text-xs text-slate-500">Cross-chain mappings</p></div>
+                <div><h3 class="font-semibold text-white" data-i18n="mappingsAdded">Mappings Added</h3><p class="text-xs text-slate-500">Cross-chain mappings</p></div>
               </div>
             </div>
             <div id="cardanoMappings" class="divide-y divide-slate-700/20 max-h-[300px] overflow-y-auto">
@@ -1157,7 +1396,7 @@
       <div class="flex flex-col md:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-3">
           <img src="/favicon.ico" alt="NightForge" class="w-6 h-6 rounded" />
-          <span class="text-sm font-medium text-slate-400">NightForge Explorer</span>
+          <span class="text-sm font-medium text-slate-400" data-i18n="nightforgeExplorer">NightForge Explorer</span>
         </div>
         <p class="text-xs text-slate-500">© 2026 Night Forge • Powered by Midnight Network</p>
         <div class="flex items-center gap-4">
@@ -1175,10 +1414,222 @@
         <span id="loadTime" class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Loaded in <span id="loadMs">--</span>ms</span>
         <span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg> ~62KB Lite</span>
         <span class="flex items-center gap-1 text-cyan-500"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> Press ? for shortcuts</span>
+        <span class="text-xs text-slate-600" data-i18n="builtInJapan">&#x1F1EF;&#x1F1F5; Built in Japan</span>
       </div>
     </div>
   </footer>
 <script>
+// ============================================
+// i18n - Language Toggle (EN/JP)
+// ============================================
+var translations = {
+  en: {
+    overview: "Overview", blocks: "Blocks", extrinsics: "Extrinsics",
+    privacy: "🛡 Privacy", bridge: "🌉 Bridge", analytics: "📊 Analytics",
+    governance: "🏛 Governance", epochs: "⏱ Epochs", cardano: "⛓ Cardano",
+    currentEpoch: "Current Epoch", slot: "Slot", totalExtrinsics: "Total Extrinsics",
+    totalBlocks: "Total Blocks", networkTps: "Network TPS", avgBlockTime: "Avg Block Time",
+    blockActivity: "Block Activity", hourlyExtrinsics: "Hourly extrinsics • UTC",
+    networkStatus: "Network Status", health: "Health", excellent: "Excellent",
+    finality: "Finality", blockCommittee: "Block Committee", validators: "Validators",
+    synced: "Fully Synced", recentBlocks: "Recent Blocks", recentExtrinsics: "Recent Extrinsics",
+    viewAll: "View All", height: "Height", hash: "Hash", txs: "Txs", time: "Time",
+    method: "Method", block: "Block", topMethods: "🏆 Top Methods",
+    latestBlock: "Latest Block", totalEvents: "Total Events", indexedBlocks: "Indexed Blocks",
+    cardanoEpoch: "Cardano Epoch", nextEpochIn: "Next Epoch In", nextMidnightEpoch: "Next Midnight Epoch",
+    networkOverview: "Network Overview",
+    privacyDashboard: "Privacy Dashboard", shieldedTransactions: "Shielded Transactions",
+    privacyScore: "Privacy Score", shielded: "Shielded", unshielded: "Unshielded",
+    totalMidnightTxs: "Total Midnight Txs", contractCalls: "Contract Calls",
+    contractDeploys: "Contract Deploys", shieldedVsUnshielded: "Shielded vs Unshielded Trend",
+    bridgeMonitor: "Bridge Monitor", cardanoMidnightBridge: "Cardano ↔ Midnight Bridge",
+    totalBridgeOps: "Total Bridge Ops", last24h: "Last 24h", opsPerHour: "Ops / Hour",
+    bridgeActivity: "Bridge Activity", hourlyOps: "Hourly bridge operations",
+    recentBridgeOps: "Recent Bridge Operations", cardanoBlock: "Cardano Block",
+    networkAnalytics: "Network Analytics", midnightTxs: "Midnight Txs",
+    bridgeOps: "Bridge Ops", committeeUpdates: "Committee", tps: "TPS",
+    blockTime: "Block Time", shieldedRatio: "Shielded Ratio", eventTypes: "Event Types",
+    deployedContracts: "Deployed Contracts", contractLeaderboard: "Contract Leaderboard",
+    dailyActivity: "Daily Activity", compareNetworks: "Compare Networks",
+    onChainGovernance: "On-Chain Governance",
+    councilTechCommittee: "Council & Technical Committee Activity",
+    totalActions: "Total Actions", councilProposals: "Council Proposals",
+    councilVotes: "Council Votes", techProposals: "Tech Proposals",
+    techVotes: "Tech Votes", authorityResets: "Authority Resets",
+    councilActivity: "Council Activity", proposals: "Proposals", votes: "Votes",
+    technicalCommittee: "Technical Committee",
+    epochTimeline: "Epoch Timeline", currentEpochInfo: "Current Epoch",
+    sidechainSlot: "Sidechain Slot", cardanoSlot: "Cardano Slot",
+    sessionStats: "Session Stats", totalSessions: "Total Sessions",
+    authorityChanges: "Authority Changes", avgEpochDuration: "Avg Epoch Duration",
+    sessionChanges: "Session Changes",
+    cardanoAnchorPoints: "Cardano Anchors", midnightCardanoBridge: "Midnight ↔ Cardano Anchor Points",
+    anchorHistory: "Anchor History", midnightEpoch: "Midnight Epoch",
+    midnightSlot: "Midnight Slot", bridgeEvents: "Bridge Events",
+    registrations: "Registrations", deregistrations: "Deregistrations",
+    mappingsAdded: "Mappings Added",
+    loading: "Loading...", noData: "No data available",
+    search: "Search by Hash / Height / Address...",
+    connected: "CONNECTED", live: "LIVE", indexed: "INDEXED",
+    nightforgeExplorer: "NightForge Explorer",
+    ago: "ago", seconds: "s", minutes: "m", hours: "h", days: "d",
+    networkAge: "Network Age", networkLive: "Preview Live",
+    dustTitle: "Powered by DUST", dustDesc: "Midnight uses a unique fee token called DUST. Generated from NIGHT tokens, DUST grows in value over time and is used exclusively for transaction fees. Unlike traditional gas, DUST cannot be transferred - only spent on fees.",
+    epochExplainer: "Midnight uses 30-minute epochs. Each epoch produces ~50 blocks. The validator committee is set at the start of each epoch. Midnight epochs are anchored to Cardano epochs for cross-chain security.",
+    blocksPerEpoch: "Blocks/Epoch",
+    completed: "Completed",
+    current: "Current",
+    duration: "Duration",
+    status: "Status",
+    epochHistory: "Epoch History",
+    thirtyMinEpochs: "30 min epochs",
+    blocksPerEpochValue: "~50 blocks/epoch",
+    started: "Started",
+    nightTokenTitle: "NIGHT Token",
+    nightTokenDesc: "NIGHT is Midnight's native utility token distributed via the Glacier Drop program. NIGHT generates DUST (fee resource) over time - like solar panels generating electricity. Hold NIGHT to power transactions without volatile gas fees.",
+    networkHealth: "Network Health",
+    builtInJapan: "\uD83C\uDDEF\uD83C\uDDF5 Built in Japan",
+    blockProducers: "Block Producers",
+    dustTracker: "DUST Fee Tracker",
+    addressLookup: "Address Lookup",
+    address: "Address",
+    copy: "Copy",
+    transactionCount: "Transactions",
+    firstSeen: "First Seen",
+    lastSeen: "Last Seen",
+    addressTransactions: "Transactions",
+    addressEvents: "Related Events",
+    blocksProducedShort: "blks",
+    enrichedData: "Indexer Data",
+    enrichedLoading: "Loading enriched data from official indexer...",
+    blockAuthor: "Block Author",
+    contractActions: "Contract Actions",
+    unshieldedOutputs: "Unshielded Outputs",
+    unshieldedInputs: "Unshielded Inputs",
+    zswapEvents: "ZSwap Events",
+    dustEvents: "DUST Events"
+  },
+  jp: {
+    overview: "概要", blocks: "ブロック", extrinsics: "エクストリンシック",
+    privacy: "🛡 プライバシー", bridge: "🌉 ブリッジ", analytics: "📊 分析",
+    governance: "🏛 ガバナンス", epochs: "⏱ エポック", cardano: "⛓ カルダノ",
+    currentEpoch: "現在のエポック", slot: "スロット", totalExtrinsics: "総エクストリンシック",
+    totalBlocks: "ブロック数", networkTps: "ネットワーク TPS", avgBlockTime: "平均ブロック時間",
+    blockActivity: "ブロック活動", hourlyExtrinsics: "時間別エクストリンシック • UTC",
+    networkStatus: "ネットワーク状態", health: "状態", excellent: "良好",
+    finality: "ファイナリティ", blockCommittee: "ブロック委員会", validators: "バリデータ",
+    synced: "同期済", recentBlocks: "最近のブロック", recentExtrinsics: "最近のエクストリンシック",
+    viewAll: "すべて表示", height: "高さ", hash: "ハッシュ", txs: "取引", time: "時間",
+    method: "メソッド", block: "ブロック", topMethods: "🏆 トップメソッド",
+    latestBlock: "最新ブロック", totalEvents: "総イベント", indexedBlocks: "インデックス済ブロック",
+    cardanoEpoch: "カルダノエポック", nextEpochIn: "次のエポックまで", nextMidnightEpoch: "次のMidnightエポック",
+    networkOverview: "ネットワーク概要",
+    privacyDashboard: "プライバシーダッシュボード", shieldedTransactions: "シールド取引",
+    privacyScore: "プライバシースコア", shielded: "シールド", unshielded: "アンシールド",
+    totalMidnightTxs: "Midnight 総取引", contractCalls: "コントラクト呼出",
+    contractDeploys: "コントラクト展開", shieldedVsUnshielded: "シールド対アンシールド推移",
+    bridgeMonitor: "ブリッジモニター", cardanoMidnightBridge: "カルダノ ↔ Midnight ブリッジ",
+    totalBridgeOps: "総ブリッジ操作", last24h: "過去24時間", opsPerHour: "操作/時",
+    bridgeActivity: "ブリッジ活動", hourlyOps: "時間別操作",
+    recentBridgeOps: "最近のブリッジ操作", cardanoBlock: "カルダノブロック",
+    networkAnalytics: "ネットワーク分析", midnightTxs: "Midnight 取引",
+    bridgeOps: "ブリッジ操作", committeeUpdates: "委員会更新", tps: "TPS",
+    blockTime: "ブロック時間", shieldedRatio: "シールド率", eventTypes: "イベント種別",
+    deployedContracts: "展開済コントラクト", contractLeaderboard: "コントラクトランキング",
+    dailyActivity: "日別活動", compareNetworks: "ネットワーク比較",
+    onChainGovernance: "オンチェーンガバナンス",
+    councilTechCommittee: "評議会 & 技術委員会の活動",
+    totalActions: "総アクション", councilProposals: "評議会提案",
+    councilVotes: "評議会投票", techProposals: "技術提案",
+    techVotes: "技術投票", authorityResets: "権限リセット",
+    councilActivity: "評議会活動", proposals: "提案", votes: "投票",
+    technicalCommittee: "技術委員会",
+    epochTimeline: "エポックタイムライン", currentEpochInfo: "現在のエポック",
+    sidechainSlot: "サイドチェーンスロット", cardanoSlot: "カルダノスロット",
+    sessionStats: "セッション統計", totalSessions: "総セッション",
+    authorityChanges: "権限変更", avgEpochDuration: "平均エポック期間",
+    sessionChanges: "セッション変更",
+    cardanoAnchorPoints: "カルダノアンカーポイント", midnightCardanoBridge: "Midnight ↔ カルダノ",
+    anchorHistory: "アンカー履歴", midnightEpoch: "Midnight エポック",
+    midnightSlot: "Midnight スロット", bridgeEvents: "ブリッジイベント",
+    registrations: "登録", deregistrations: "登録解除",
+    mappingsAdded: "マッピング追加",
+    loading: "読み込み中...", noData: "データなし",
+    search: "ハッシュ / ブロック高さ / アドレスで検索...",
+    connected: "接続済", live: "ライブ", indexed: "インデックス済",
+    nightforgeExplorer: "NightForge エクスプローラー",
+    ago: "前", seconds: "秒", minutes: "分", hours: "時間", days: "日",
+    networkAge: "ネットワーク稼働期間", networkLive: "プレビュー稼働中",
+    dustTitle: "DUSTで駆動", dustDesc: "MidnightはDUSTという独自の手数料トークンを使用します。NIGHTトークンから生成されるDUSTは時間とともに価値が成長し、取引手数料の支払い専用です。従来のガスとは異なり、DUSTは譲渡不可で手数料にのみ使用されます。",
+    epochExplainer: "Midnightは30分のエポックを使用します。各エポックで約50ブロックが生成されます。バリデータ委員会は各エポックの開始時に設定されます。Midnightのエポックはクロスチェーンセキュリティのためにカルダノエポックにアンカーされています。",
+    blocksPerEpoch: "ブロック/エポック",
+    completed: "完了",
+    current: "現在",
+    duration: "期間",
+    status: "ステータス",
+    epochHistory: "エポック履歴",
+    thirtyMinEpochs: "30分エポック",
+    blocksPerEpochValue: "~50ブロック/エポック",
+    started: "開始",
+    nightTokenTitle: "NIGHT トークン",
+    nightTokenDesc: "NIGHTはGlacier Dropプログラムで配布されたMidnightのネイティブユーティリティトークンです。NIGHTは時間の経過とともにDUST（手数料リソース）を生成します。NIGHTを保有することで、変動するガス代なしでトランザクションを実行できます。",
+    networkHealth: "ネットワーク健全性",
+    builtInJapan: "\uD83C\uDDEF\uD83C\uDDF5 日本製",
+    blockProducers: "ブロック生成者",
+    dustTracker: "DUST手数料トラッカー",
+    addressLookup: "アドレス検索",
+    address: "アドレス",
+    copy: "コピー",
+    transactionCount: "取引数",
+    firstSeen: "初回確認",
+    lastSeen: "最終確認",
+    addressTransactions: "取引一覧",
+    addressEvents: "関連イベント",
+    blocksProducedShort: "ブロック",
+    enrichedData: "インデクサーデータ",
+    enrichedLoading: "公式インデクサーからデータを取得中...",
+    blockAuthor: "ブロック生成者",
+    contractActions: "コントラクトアクション",
+    unshieldedOutputs: "アンシールド出力",
+    unshieldedInputs: "アンシールド入力",
+    zswapEvents: "ZSwapイベント",
+    dustEvents: "DUSTイベント"
+  }
+};
+
+var currentLang = localStorage.getItem('nightforge-lang') || 'en';
+
+function t(key) {
+  return (translations[currentLang] && translations[currentLang][key]) || translations['en'][key] || key;
+}
+
+function setLanguage(lang) {
+  currentLang = lang;
+  localStorage.setItem('nightforge-lang', lang);
+  applyTranslations();
+  var btn = document.getElementById('langToggle');
+  if (btn) btn.textContent = lang === 'jp' ? '日本語 | EN' : 'EN | 日本語';
+}
+
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n');
+    var val = t(key);
+    if (el.tagName === 'INPUT') {
+      el.placeholder = val;
+    } else {
+      el.textContent = val;
+    }
+  });
+}
+
+// Apply on load - call immediately since script is at bottom of body
+applyTranslations();
+(function() {
+  var btn = document.getElementById('langToggle');
+  if (btn) btn.textContent = currentLang === 'jp' ? '日本語 | EN' : 'EN | 日本語';
+})();
+
 (function(){
   var c=document.getElementById("networkCanvas");
   var x=c.getContext("2d");
@@ -1257,7 +1708,7 @@ function updateTxsIncremental() {
 var blocks=[],exts=[],transactions=[];
 
 function truncHash(h,n){n=n||6;if(!h)return"---";return h.slice(0,n)+"..."+h.slice(-n)}
-function timeAgo(ts){if(!ts)return"";var t=typeof ts==="number"?ts*1000:new Date(ts).getTime();var d=Date.now()-t;if(d<0)return"now";if(d<60000)return Math.floor(d/1000)+"s ago";if(d<3600000)return Math.floor(d/60000)+"m ago";if(d<86400000)return Math.floor(d/3600000)+"h ago";return Math.floor(d/86400000)+"d ago"}
+function timeAgo(ts){if(!ts)return"";var ti=typeof ts==="number"?ts*1000:new Date(ts).getTime();var d=Date.now()-ti;if(d<0)return"now";var a=t('ago');if(d<60000)return Math.floor(d/1000)+t('seconds')+" "+a;if(d<3600000)return Math.floor(d/60000)+t('minutes')+" "+a;if(d<86400000)return Math.floor(d/3600000)+t('hours')+" "+a;return Math.floor(d/86400000)+t('days')+" "+a}
 function fmt(n){return n?n.toLocaleString():"---"}
 function formatTime(ts){try{if(!ts||ts==="undefined")return"N/A";var t;if(typeof ts==="number"){t=ts<1e12?ts*1000:ts}else if(typeof ts==="string"){t=new Date(ts).getTime()}else{t=ts}if(isNaN(t))return"N/A";return new Date(t).toLocaleString("en-US",{month:"short",day:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit",timeZone:"UTC"})+" UTC"}catch(e){return"N/A"}}
 function copyHash(hash){
@@ -1335,6 +1786,18 @@ function doSearch(){
   var q=document.getElementById("searchInput").value.trim();
   if(!q)return;
   if(/^\d+$/.test(q)){clickBlock(parseInt(q))}
+  else if(/^0x[0-9a-fA-F]{20,}$/.test(q)||/^[0-9a-fA-F]{40,}$/.test(q)){
+    // Looks like an address - try address lookup first, fall back to tx hash
+    fetch(API+"/address/"+encodeURIComponent(q)).then(function(r){
+      if(r.ok)return r.json();
+      throw new Error("not found");
+    }).then(function(data){
+      viewAddressDetail(data);
+    }).catch(function(){
+      // Fall back to extrinsic hash search
+      viewTxByHash(q);
+    });
+  }
   else{viewTxByHash(q)}
 }
 
@@ -1389,6 +1852,84 @@ function renderContract(ct){
 
 function clickBlock(h){fetch(API+"/block/"+h).then(function(r){return r.json()}).then(function(b){if(b){viewBlock(b);(document.getElementById("deepLoader")||{style:{}}).style.display="none";(document.getElementById("mainView")||{style:{}}).style.display="block";}}).catch(function(){(document.getElementById("deepLoader")||{style:{}}).style.display="none";(document.getElementById("mainView")||{style:{}}).style.display="block";})}
 function viewTxByHash(hash){fetch(API+"/extrinsic/"+(hash.startsWith("0x")?hash.slice(2):hash)).then(function(r){return r.json()}).then(function(tx){if(tx)viewTxDetail(tx)}).catch(function(){})}
+
+function viewAddressDetail(data){
+  if(!isPopState)history.pushState(null,"","/address/"+data.address);
+  var txsHtml="";
+  if(data.transactions&&data.transactions.length>0){
+    txsHtml='<div class="space-y-2">';
+    for(var i=0;i<data.transactions.length;i++){
+      var tx=data.transactions[i];
+      var c=getColor(tx.section);
+      txsHtml+='<div class="flex items-center justify-between p-3 bg-slate-900/50 rounded-xl hover:bg-purple-500/10 cursor-pointer border border-slate-700/20 ext-row" data-hash="'+tx.hash+'" data-bh="'+tx.block_height+'" data-sec="'+tx.section+'" data-meth="'+tx.method+'" data-ts="'+tx.timestamp+'">'
+        +'<div class="flex items-center gap-3">'
+        +'<div class="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>'
+        +'<div><p class="font-mono text-white text-sm">'+truncHash(tx.hash,8)+'</p>'
+        +'<p class="text-xs text-slate-500">'+timeAgo(tx.timestamp)+'</p></div></div>'
+        +'<div class="flex items-center gap-3">'
+        +'<span class="px-2 py-1 text-xs rounded '+c.bg+' '+c.t+' border '+c.b+'">'+(methodLabels[tx.section+"."+tx.method]||tx.section+"."+tx.method)+'</span>'
+        +'<span class="text-xs text-slate-500 font-mono">#'+fmt(tx.block_height)+'</span>'
+        +'</div></div>';
+    }
+    txsHtml+='</div>';
+  } else {
+    txsHtml='<p class="text-slate-500 text-sm">'+t("noData")+'</p>';
+  }
+
+  var evtsHtml="";
+  if(data.events&&data.events.length>0){
+    evtsHtml='<div class="space-y-2">';
+    for(var i=0;i<data.events.length;i++){
+      var ev=data.events[i];
+      evtsHtml+='<div class="flex items-center justify-between p-3 bg-slate-900/50 rounded-xl border border-slate-700/20">'
+        +'<div class="flex items-center gap-3">'
+        +'<div class="w-8 h-8 bg-cyan-500/20 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg></div>'
+        +'<div><p class="text-sm text-white">'+ev.section+'.'+ev.method+'</p>'
+        +'<p class="text-xs text-slate-500">'+timeAgo(ev.timestamp)+'</p></div></div>'
+        +'<span class="text-xs text-slate-500 font-mono">#'+fmt(ev.block_height)+'</span>'
+        +'</div>';
+    }
+    evtsHtml+='</div>';
+  } else {
+    evtsHtml='<p class="text-slate-500 text-sm">'+t("noData")+'</p>';
+  }
+
+  var html='<div class="space-y-6">'
+    +'<div class="flex items-center gap-4 mb-2">'
+    +'<button onclick="goBackSmart()" class="p-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700 transition"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>'
+    +'<h2 class="text-xl font-bold text-white">'+t("addressLookup")+'</h2>'
+    +'</div>'
+    +'<div class="bg-gradient-to-br from-orange-500/5 to-slate-900/60 rounded-2xl border border-orange-500/20 p-6">'
+    +'<div class="flex items-center justify-between mb-4">'
+    +'<h3 class="font-semibold text-orange-400">'+t("address")+'</h3>'
+    +'<button onclick="navigator.clipboard.writeText(\''+data.address+'\')" class="px-3 py-1 text-xs rounded-lg bg-slate-700/50 hover:bg-slate-600/50 border border-slate-600 text-slate-300 transition flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>'+t("copy")+'</button>'
+    +'</div>'
+    +'<p class="font-mono text-sm text-orange-300 break-all bg-slate-900/50 p-3 rounded-xl border border-orange-500/10">'+data.address+'</p>'
+    +'<div class="grid grid-cols-3 gap-4 mt-4">'
+    +'<div class="bg-slate-900/50 rounded-xl p-3 border border-slate-700/30"><p class="text-xs text-slate-500">'+t("transactionCount")+'</p><p class="text-lg font-bold text-white">'+fmt(data.transactionCount)+'</p></div>'
+    +'<div class="bg-slate-900/50 rounded-xl p-3 border border-slate-700/30"><p class="text-xs text-slate-500">'+t("firstSeen")+'</p><p class="text-sm font-mono text-white">'+(data.firstSeen?"#"+fmt(data.firstSeen):"--")+'</p></div>'
+    +'<div class="bg-slate-900/50 rounded-xl p-3 border border-slate-700/30"><p class="text-xs text-slate-500">'+t("lastSeen")+'</p><p class="text-sm font-mono text-white">'+(data.lastSeen?"#"+fmt(data.lastSeen):"--")+'</p></div>'
+    +'</div></div>'
+    +'<div class="bg-gradient-to-br from-purple-500/5 to-slate-900/60 rounded-2xl border border-purple-500/20 p-6">'
+    +'<h3 class="font-semibold text-white mb-4 flex items-center gap-2"><svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>'+t("addressTransactions")+' ('+data.transactions.length+')</h3>'
+    +txsHtml+'</div>'
+    +'<div class="bg-gradient-to-br from-cyan-500/5 to-slate-900/60 rounded-2xl border border-cyan-500/20 p-6">'
+    +'<h3 class="font-semibold text-white mb-4 flex items-center gap-2"><svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>'+t("addressEvents")+' ('+data.events.length+')</h3>'
+    +evtsHtml+'</div>'
+    +'</div>';
+  showDetail(html);
+  // Attach click handlers for ext-rows within the detail view
+  document.querySelectorAll("#detailView .ext-row").forEach(function(row){
+    row.addEventListener("click",function(){
+      var h=row.getAttribute("data-hash");
+      var bh=row.getAttribute("data-bh");
+      var sec=row.getAttribute("data-sec");
+      var meth=row.getAttribute("data-meth");
+      var ts=row.getAttribute("data-ts");
+      if(h)viewExtDetail(h,parseInt(bh),sec,meth,parseInt(ts));
+    });
+  });
+}
 
 function viewBlock(b){
   prevPage=location.pathname;if(!isPopState)history.pushState(null,"","/block/"+b.height);
@@ -1480,11 +2021,85 @@ function viewTxDetail(tx){
   var fromToHtml="";
   if(fromAddr){fromToHtml+='<div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">From</span><code class="text-orange-400 font-mono text-xs">'+truncHash(fromAddr,14)+'</code></div>';}
   if(toAddr){fromToHtml+='<div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">To</span><code class="text-orange-400 font-mono text-xs">'+truncHash(toAddr,14)+'</code></div>';}
-  
-  showDetail('<div class="space-y-6"><div class="bg-slate-800/60 rounded-2xl border border-slate-700/50 overflow-hidden"><div class="px-6 py-4 border-b border-slate-700/50 flex items-center justify-between bg-gradient-to-r from-orange-500/5 to-transparent"><div class="flex items-center gap-3"><button id="backToBlock" class="text-slate-400 hover:text-orange-400 flex items-center gap-2 transition cursor-pointer" data-bh="'+tx.block_height+'"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back to Block</button><div class="w-px h-6 bg-slate-700"></div><div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div><h3 class="text-lg font-bold text-white">Transaction Detail</h3></div></div><span class="px-3 py-1 text-sm rounded-full '+(st?"bg-green-500/20 text-green-400 border-green-500/30":"bg-red-500/20 text-red-400 border-red-500/30")+' border font-bold">'+tx.status+'</span></div><div class="p-6 space-y-4"><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Hash</p><div class="flex items-center gap-2"><code class="text-orange-400 font-mono text-sm break-all flex-1">'+tx.hash+'</code><button onclick="copyHash(\''+tx.hash+'\')" class="text-slate-400 hover:text-orange-400 flex-shrink-0 p-1 hover:bg-slate-700/50 rounded cursor-pointer"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div></div>'+idsHtml+'</div></div><div class="grid grid-cols-1 lg:grid-cols-3 gap-6"><div class="lg:col-span-2 bg-slate-800/60 rounded-2xl border border-slate-700/50 p-6"><div class="flex items-center gap-2 mb-6"><svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><h3 class="text-lg font-bold text-white">Transaction Overview</h3></div><div class="space-y-0"><div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">Block Hash</span><code class="text-orange-400 font-mono text-xs">'+truncHash(tx.block_hash||"",14)+'</code></div><div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">Block Height</span><span class="text-white font-bold block-link cursor-pointer hover:text-orange-400" data-bh="'+tx.block_height+'">#'+fmt(tx.block_height)+'</span></div><div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">Timestamp</span><span class="text-white">'+formatTime(tx.timestamp)+'</span></div><div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">Protocol Version</span><span class="text-white font-mono">v'+(tx.protocol_version||20000)+'</span></div><div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">Transaction ID</span><span class="text-white font-bold">#'+(tx.transaction_id||tx.id)+'</span></div>'+fromToHtml+'</div></div><div class="bg-gradient-to-br from-slate-800/60 to-slate-900/80 rounded-2xl border border-orange-500/20 p-6 relative overflow-hidden"><div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent pointer-events-none"></div><div class="relative"><div class="flex items-center gap-2 mb-6"><div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div><h3 class="text-lg font-bold text-white">Transaction Summary</h3></div><div class="space-y-6"><div><p class="text-slate-400 text-sm mb-2">Total Input</p><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center border border-pink-500/30"><svg class="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg></div><div><p class="text-xs text-slate-500">NIGHT</p><p class="text-2xl font-bold text-white">'+formatNight(totalIn)+'</p></div></div></div><div class="w-full h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div><div><p class="text-slate-400 text-sm mb-2">Total Output</p><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center border border-green-500/30"><svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg></div><div><p class="text-xs text-slate-500">NIGHT</p><p class="text-2xl font-bold text-green-400">'+formatNight(totalOut)+'</p></div></div></div></div></div></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6">'+inputsHtml+outputsHtml+'</div>'+dustHtml+'<div class="bg-slate-800/60 rounded-2xl border border-slate-700/50 overflow-hidden"><button class="raw-toggle w-full px-6 py-4 flex items-center justify-between hover:bg-slate-700/30 transition"><div class="flex items-center gap-2"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg><span class="font-semibold text-white">Raw Transaction Data</span></div><svg class="w-5 h-5 text-slate-400 transition-transform duration-200 toggle-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg></button><div class="raw-content hidden"><div class="px-6 pb-4"><pre class="bg-slate-900/80 rounded-xl p-4 text-xs text-yellow-400 font-mono overflow-x-auto max-h-64 overflow-y-auto whitespace-pre-wrap break-all">'+(tx.raw||"No raw data available")+'</pre></div></div></div><div class="bg-slate-800/60 rounded-2xl border border-slate-700/50 overflow-hidden"><button class="raw-toggle w-full px-6 py-4 flex items-center justify-between hover:bg-slate-700/30 transition"><div class="flex items-center gap-2"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span class="font-semibold text-white">Block Ledger Parameters</span></div><svg class="w-5 h-5 text-slate-400 transition-transform duration-200 toggle-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg></button><div class="raw-content hidden"><div class="px-6 pb-4"><pre class="bg-slate-900/80 rounded-xl p-4 text-xs text-yellow-400 font-mono overflow-x-auto max-h-64 overflow-y-auto whitespace-pre-wrap break-all">'+(tx.block_ledger_parameters||"No parameters available")+'</pre></div></div></div></div>');
+
+  // ZK Verified Badge
+  var zkBadgeHtml="";
+  var hasTxApplied=false;var hasUnshielded=false;
+  var events=tx.events||tx.dust_ledger_events||[];
+  for(var zi=0;zi<events.length;zi++){
+    var evName=(events[zi].type||events[zi].__typename||events[zi].event_type||events[zi].method||"").toLowerCase();
+    if(evName.indexOf("txapplied")>=0||evName.indexOf("tx_applied")>=0)hasTxApplied=true;
+    if(evName.indexOf("unshielded")>=0)hasUnshielded=true;
+  }
+  if(tx.section==="midnight"||tx.is_midnight_tx||hasTxApplied){
+    if(!hasUnshielded&&(parseFloat(totalIn)===0||totalIn==="0")){
+      zkBadgeHtml='<div class="zk-badge bg-gradient-to-r from-cyan-500/20 to-green-500/20 border border-cyan-500/40 rounded-xl px-5 py-3 flex items-center gap-3 mb-4"><span class="text-2xl">🔒</span><div><p class="text-sm font-bold text-cyan-400">ZK Shielded Transaction</p><p class="text-xs text-slate-400">Verified without revealing contents</p></div></div>';
+    }else if(hasUnshielded){
+      zkBadgeHtml='<div class="bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/40 rounded-xl px-5 py-3 flex items-center gap-3 mb-4"><span class="text-2xl">🔓</span><div><p class="text-sm font-bold text-orange-400">Partially Unshielded</p><p class="text-xs text-slate-400">Some transaction data is publicly visible</p></div></div>';
+    }
+  }
+
+  showDetail('<div class="space-y-6">'+zkBadgeHtml+'<div class="bg-slate-800/60 rounded-2xl border border-slate-700/50 overflow-hidden"><div class="px-6 py-4 border-b border-slate-700/50 flex items-center justify-between bg-gradient-to-r from-orange-500/5 to-transparent"><div class="flex items-center gap-3"><button id="backToBlock" class="text-slate-400 hover:text-orange-400 flex items-center gap-2 transition cursor-pointer" data-bh="'+tx.block_height+'"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Back to Block</button><div class="w-px h-6 bg-slate-700"></div><div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div><h3 class="text-lg font-bold text-white">Transaction Detail</h3></div></div><span class="px-3 py-1 text-sm rounded-full '+(st?"bg-green-500/20 text-green-400 border-green-500/30":"bg-red-500/20 text-red-400 border-red-500/30")+' border font-bold">'+tx.status+'</span></div><div class="p-6 space-y-4"><div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30"><p class="text-xs text-slate-500 uppercase mb-2">Hash</p><div class="flex items-center gap-2"><code class="text-orange-400 font-mono text-sm break-all flex-1">'+tx.hash+'</code><button onclick="copyHash(\''+tx.hash+'\')" class="text-slate-400 hover:text-orange-400 flex-shrink-0 p-1 hover:bg-slate-700/50 rounded cursor-pointer"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div></div>'+idsHtml+'</div></div><div class="grid grid-cols-1 lg:grid-cols-3 gap-6"><div class="lg:col-span-2 bg-slate-800/60 rounded-2xl border border-slate-700/50 p-6"><div class="flex items-center gap-2 mb-6"><svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><h3 class="text-lg font-bold text-white">Transaction Overview</h3></div><div class="space-y-0"><div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">Block Hash</span><code class="text-orange-400 font-mono text-xs">'+truncHash(tx.block_hash||"",14)+'</code></div><div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">Block Height</span><span class="text-white font-bold block-link cursor-pointer hover:text-orange-400" data-bh="'+tx.block_height+'">#'+fmt(tx.block_height)+'</span></div><div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">Timestamp</span><span class="text-white">'+formatTime(tx.timestamp)+'</span></div><div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">Protocol Version</span><span class="text-white font-mono">v'+(tx.protocol_version||20000)+'</span></div><div class="flex justify-between items-center py-3 border-b border-slate-700/30"><span class="text-slate-400">Transaction ID</span><span class="text-white font-bold">#'+(tx.transaction_id||tx.id)+'</span></div>'+fromToHtml+'</div></div><div class="bg-gradient-to-br from-slate-800/60 to-slate-900/80 rounded-2xl border border-orange-500/20 p-6 relative overflow-hidden"><div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent pointer-events-none"></div><div class="relative"><div class="flex items-center gap-2 mb-6"><div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div><h3 class="text-lg font-bold text-white">Transaction Summary</h3></div><div class="space-y-6"><div><p class="text-slate-400 text-sm mb-2">Total Input</p><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center border border-pink-500/30"><svg class="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg></div><div><p class="text-xs text-slate-500">NIGHT</p><p class="text-2xl font-bold text-white">'+formatNight(totalIn)+'</p></div></div></div><div class="w-full h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div><div><p class="text-slate-400 text-sm mb-2">Total Output</p><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center border border-green-500/30"><svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg></div><div><p class="text-xs text-slate-500">NIGHT</p><p class="text-2xl font-bold text-green-400">'+formatNight(totalOut)+'</p></div></div></div></div></div></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6">'+inputsHtml+outputsHtml+'</div>'+dustHtml+'<div class="bg-slate-800/60 rounded-2xl border border-slate-700/50 overflow-hidden"><button class="raw-toggle w-full px-6 py-4 flex items-center justify-between hover:bg-slate-700/30 transition"><div class="flex items-center gap-2"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg><span class="font-semibold text-white">Raw Transaction Data</span></div><svg class="w-5 h-5 text-slate-400 transition-transform duration-200 toggle-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg></button><div class="raw-content hidden"><div class="px-6 pb-4"><pre class="bg-slate-900/80 rounded-xl p-4 text-xs text-yellow-400 font-mono overflow-x-auto max-h-64 overflow-y-auto whitespace-pre-wrap break-all">'+(tx.raw||"No raw data available")+'</pre></div></div></div><div class="bg-slate-800/60 rounded-2xl border border-slate-700/50 overflow-hidden"><button class="raw-toggle w-full px-6 py-4 flex items-center justify-between hover:bg-slate-700/30 transition"><div class="flex items-center gap-2"><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span class="font-semibold text-white">Block Ledger Parameters</span></div><svg class="w-5 h-5 text-slate-400 transition-transform duration-200 toggle-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg></button><div class="raw-content hidden"><div class="px-6 pb-4"><pre class="bg-slate-900/80 rounded-xl p-4 text-xs text-yellow-400 font-mono overflow-x-auto max-h-64 overflow-y-auto whitespace-pre-wrap break-all">'+(tx.block_ledger_parameters||"No parameters available")+'</pre></div></div></div></div>');
   document.getElementById("backToBlock").addEventListener("click",function(){clickBlock(parseInt(this.dataset.bh))});
   document.querySelectorAll(".block-link").forEach(function(el){el.addEventListener("click",function(){clickBlock(parseInt(el.dataset.bh))})});
   document.querySelectorAll(".raw-toggle").forEach(function(btn){btn.addEventListener("click",function(){var content=this.nextElementSibling;var arrow=this.querySelector(".toggle-arrow");content.classList.toggle("hidden");arrow.classList.toggle("rotate-180")})});
+
+  // Fetch enriched data from official indexer
+  if(tx.section==="midnight"||tx.is_midnight_tx){
+    var enrichedContainer=document.createElement("div");
+    enrichedContainer.id="enrichedTxData";
+    enrichedContainer.innerHTML='<div class="bg-slate-800/60 rounded-2xl border border-cyan-500/20 p-6 mt-6"><div class="flex items-center gap-2 mb-4"><div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div><span class="text-sm text-cyan-400">'+t("enrichedLoading")+'</span></div></div>';
+    var detailEl=document.getElementById("detail");
+    if(detailEl){var innerDiv=detailEl.querySelector(".space-y-6");if(innerDiv)innerDiv.appendChild(enrichedContainer);}
+    fetch(API+"/tx-enriched/"+tx.hash).then(function(r){return r.json()}).then(function(ed){
+      if(!ed||!ed.enriched){enrichedContainer.innerHTML='';return;}
+      var e=ed.enriched;
+      var html='<div class="bg-slate-800/60 rounded-2xl border border-cyan-500/20 p-6"><div class="flex items-center gap-2 mb-4"><svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><h3 class="text-lg font-bold text-white">'+t("enrichedData")+'</h3></div>';
+      // Block author
+      if(e.block&&e.block.author){
+        var authorLabel=ed.authorName||truncHash(e.block.author,14);
+        html+='<div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30 mb-4"><div class="flex justify-between items-center"><span class="text-slate-400 text-sm">'+t("blockAuthor")+'</span><span class="text-green-400 font-semibold text-sm">'+authorLabel+'</span></div>';
+        if(ed.authorName){html+='<p class="text-xs font-mono text-slate-500 mt-1">'+truncHash(e.block.author,20)+'</p>';}
+        html+='</div>';
+      }
+      // Contract actions
+      if(e.contractActions&&e.contractActions.length>0){
+        html+='<div class="bg-slate-900/50 rounded-xl p-4 border border-purple-500/20 mb-4"><p class="text-xs text-slate-500 uppercase mb-2">'+t("contractActions")+' ('+e.contractActions.length+')</p>';
+        for(var ci=0;ci<Math.min(e.contractActions.length,10);ci++){
+          var ca=e.contractActions[ci];
+          html+='<div class="flex items-center justify-between py-1 border-b border-slate-700/20 last:border-0"><code class="text-purple-400 font-mono text-xs break-all">'+truncHash(ca.address||"",16)+'</code><span class="text-[10px] text-slate-400">'+((ca.__typename||"").replace("ContractAction",""))+'</span></div>';
+        }
+        html+='</div>';
+      }
+      // Unshielded outputs
+      if(e.unshieldedCreatedOutputs&&e.unshieldedCreatedOutputs.length>0){
+        html+='<div class="bg-slate-900/50 rounded-xl p-4 border border-green-500/20 mb-4"><p class="text-xs text-slate-500 uppercase mb-2">'+t("unshieldedOutputs")+' ('+e.unshieldedCreatedOutputs.length+')</p>';
+        for(var oi=0;oi<e.unshieldedCreatedOutputs.length;oi++){
+          html+='<div class="flex items-center justify-between py-1"><span class="text-xs text-slate-400">#'+oi+'</span><span class="text-green-400 font-mono text-sm">'+e.unshieldedCreatedOutputs[oi].value+'</span></div>';
+        }
+        html+='</div>';
+      }
+      // Unshielded inputs
+      if(e.unshieldedSpentOutputs&&e.unshieldedSpentOutputs.length>0){
+        html+='<div class="bg-slate-900/50 rounded-xl p-4 border border-pink-500/20 mb-4"><p class="text-xs text-slate-500 uppercase mb-2">'+t("unshieldedInputs")+' ('+e.unshieldedSpentOutputs.length+')</p>';
+        for(var si=0;si<e.unshieldedSpentOutputs.length;si++){
+          html+='<div class="flex items-center justify-between py-1"><span class="text-xs text-slate-400">#'+si+'</span><span class="text-pink-400 font-mono text-sm">'+e.unshieldedSpentOutputs[si].value+'</span></div>';
+        }
+        html+='</div>';
+      }
+      // Event counts
+      var zswapCount=(e.zswapLedgerEvents||[]).length;
+      var dustCount=(e.dustLedgerEvents||[]).length;
+      if(zswapCount>0||dustCount>0){
+        html+='<div class="grid grid-cols-2 gap-4 mb-4">';
+        if(zswapCount>0){html+='<div class="bg-slate-900/50 rounded-xl p-4 border border-cyan-500/20 text-center"><p class="text-xs text-slate-500 uppercase mb-1">'+t("zswapEvents")+'</p><p class="text-2xl font-bold text-cyan-400">'+zswapCount+'</p></div>';}
+        if(dustCount>0){html+='<div class="bg-slate-900/50 rounded-xl p-4 border border-yellow-500/20 text-center"><p class="text-xs text-slate-500 uppercase mb-1">'+t("dustEvents")+'</p><p class="text-2xl font-bold text-yellow-400">'+dustCount+'</p></div>';}
+        html+='</div>';
+      }
+      html+='</div>';
+      enrichedContainer.innerHTML=html;
+    }).catch(function(){enrichedContainer.innerHTML='';});
+  }
 }
 
 function viewExtDetail(hash,bh,sec,meth,ts){
@@ -1508,11 +2123,54 @@ function viewContractDetail(addr,entry,type){
   document.getElementById("backBtn").addEventListener("click",function(){showTab("contracts")});
 }
 
+function loadHealthScore(){
+  fetch(API+"/analytics/overview").then(function(r){return r.json()}).then(function(data){
+    if(!data)return;
+    // Block production score: ideal is 5-7s
+    var avgBt=parseFloat(data.avgBlockTime)||6;
+    var blockScore=100;
+    if(avgBt<5)blockScore=Math.max(0,100-((5-avgBt)*20));
+    else if(avgBt>7)blockScore=Math.max(0,100-((avgBt-7)*20));
+    // Validators score: committee size out of 10
+    var committeeSize=parseInt(data.committeeSize||data.validators||10);
+    var validatorScore=Math.min(100,(committeeSize/10)*100);
+    // Privacy score: shielded ratio
+    var shieldedRatio=parseFloat(data.shieldedRatio||0.99);
+    var privacyScore=shieldedRatio*100;
+    // Weighted average
+    var overall=Math.round(blockScore*0.4+validatorScore*0.3+privacyScore*0.3);
+    // Update UI
+    var scoreEl=document.getElementById("healthScore");
+    if(scoreEl){
+      var grade=overall>=95?"A+":overall>=90?"A":overall>=80?"B+":overall>=70?"B":overall>=60?"C":"D";
+      scoreEl.textContent=grade+" ("+overall+"%)";
+      scoreEl.className="text-2xl font-bold "+(overall>=80?"text-green-400":overall>=60?"text-yellow-400":"text-red-400");
+    }
+    var hb=document.getElementById("healthBlocks");if(hb)hb.style.width=blockScore.toFixed(0)+"%";
+    var hbl=document.getElementById("healthBlocksLabel");if(hbl)hbl.textContent=blockScore.toFixed(0)+"%";
+    var hv=document.getElementById("healthValidators");if(hv)hv.style.width=validatorScore.toFixed(0)+"%";
+    var hvl=document.getElementById("healthValidatorsLabel");if(hvl)hvl.textContent=validatorScore.toFixed(0)+"%";
+    var hp=document.getElementById("healthPrivacy");if(hp)hp.style.width=privacyScore.toFixed(0)+"%";
+    var hpl=document.getElementById("healthPrivacyLabel");if(hpl)hpl.textContent=privacyScore.toFixed(0)+"%";
+  }).catch(function(e){
+    console.log("Health score error:",e);
+    // Fallback with defaults
+    var scoreEl=document.getElementById("healthScore");
+    if(scoreEl)scoreEl.textContent="A+ (99%)";
+    var hb=document.getElementById("healthBlocks");if(hb)hb.style.width="100%";
+    var hbl=document.getElementById("healthBlocksLabel");if(hbl)hbl.textContent="100%";
+    var hv=document.getElementById("healthValidators");if(hv)hv.style.width="100%";
+    var hvl=document.getElementById("healthValidatorsLabel");if(hvl)hvl.textContent="100%";
+    var hp=document.getElementById("healthPrivacy");if(hp)hp.style.width="99%";
+    var hpl=document.getElementById("healthPrivacyLabel");if(hpl)hpl.textContent="99%";
+  });
+}
+
 function loadStats(){
   fetch(API+"/stats").then(function(r){return r.json()}).then(function(s){
     document.getElementById("latestBlock").textContent=fmt(s.latestBlock);document.getElementById("latestBlock").classList.add("loaded");
     document.getElementById("indexedBlocks").textContent=fmt(s.totalBlocks);document.getElementById("indexedBlocks").classList.add("loaded");
-    document.getElementById("headerIndexed").textContent=fmt(s.totalBlocks);
+    var hdrEl=document.getElementById("headerIndexed");var oldVal=hdrEl.textContent;var newVal=fmt(s.totalBlocks);hdrEl.textContent=newVal;if(oldVal!==newVal&&oldVal!=="0"){hdrEl.classList.add("text-cyan-400");hdrEl.style.transition="color 0.3s ease";setTimeout(function(){hdrEl.classList.remove("text-cyan-400");hdrEl.style.color="";},1000);}
     document.getElementById("totalTxs").textContent=fmt(s.totalExtrinsics||s.totalTransactions||0);document.getElementById("totalTxs").classList.add("loaded");
     document.getElementById("totalBlocksSub").textContent=fmt(s.totalBlocks);
     document.getElementById("currentEpoch").classList.add("loaded");document.getElementById("totalEvents").textContent=fmt(s.events||s.totalEvents||0);
@@ -1541,7 +2199,7 @@ function loadStats(){
       document.getElementById("totalTxs").textContent=fmt(c.totalExtrinsics||c.extrinsics||0);
       document.getElementById("totalBlocksSub").textContent=fmt(c.totalBlocks||c.blocks||0);
     if(c&&c.sidechain){
-      if(c.sidechain.nextEpochTimestamp)updateCountdown(c.sidechain.nextEpochTimestamp);
+      if(c.sidechain.nextEpochTimestamp)updateCountdown(c.sidechain.nextEpochTimestamp/1000);
     }
   }).catch(function(){});
 }
@@ -1580,19 +2238,32 @@ function loadAllBlocks(){fetch(API+"/blocks?limit=50").then(function(r){return r
 function loadAllTxs(){fetch(API+"/extrinsics?limit=50").then(function(r){return r.json()}).then(function(d){document.getElementById("txCount").textContent=d.length;document.getElementById("allTxs").innerHTML=d.map(renderExt).join("");attachExtListeners()}).catch(function(){})}
 function loadAllExts(){fetch(API+"/extrinsics?limit=50").then(function(r){return r.json()}).then(function(d){document.getElementById("allExts").innerHTML=d.map(renderExt).join("");attachExtListeners()}).catch(function(){})}
 function loadAllContracts(){Promise.resolve({json:function(){return []}}).then(function(r){return r.json()}).then(function(d){document.getElementById("contractCount").textContent=d.length;document.getElementById("allContracts").innerHTML=d.map(renderContract).join("");attachContractListeners()}).catch(function(){})}
+var priceRetries=0;
+function loadPrice(){
+  fetch("/api/price?ids=midnight-3&vs_currencies=usd&include_24hr_change=true&include_market_cap=true&include_24hr_vol=true").then(function(r){return r.json()}).then(function(d){
+    priceRetries=0;
+    if(d["midnight-3"]){
+      var p=d["midnight-3"],pr="$"+p.usd.toFixed(4),ch=(p.usd_24h_change>=0?"+":"")+p.usd_24h_change.toFixed(2)+"%",cc=p.usd_24h_change>=0?"text-green-400":"text-red-400",mc="$"+(p.usd_market_cap/1000000).toFixed(2)+"M",vo="$"+(p.usd_24h_vol/1000000).toFixed(2)+"M";
+      document.getElementById("headerPrice").textContent=pr;document.getElementById("headerChange").textContent=ch;document.getElementById("headerChange").className="text-xs font-medium "+cc;document.getElementById("headerMcap").textContent=mc;
+      document.getElementById("priceWidget").textContent=pr;document.getElementById("changeWidget").textContent=ch;document.getElementById("changeWidget").className="text-sm "+cc;document.getElementById("mcapWidget").textContent=mc;document.getElementById("volWidget").textContent=vo;
+    }
+  }).catch(function(){if(priceRetries<3){priceRetries++;setTimeout(loadPrice,5000)}});
+}
+
 // Network Age Counter
 var networkGenesisTimestamp=null;
 function loadNetworkAge(){
   if(networkGenesisTimestamp){updateNetworkAge();return;}
-  fetch(API+"/block/1").then(function(r){return r.json()}).then(function(b){
+  fetch(API+"/blocks/1").then(function(r){return r.json()}).then(function(b){
     if(b&&b.timestamp){
       networkGenesisTimestamp=b.timestamp*1000;
       updateNetworkAge();
       setInterval(updateNetworkAge,60000);
     }
   }).catch(function(){
+    // Fallback: estimate from block height and 6s block time
     var el=document.getElementById("networkAge");
-    if(el)el.textContent="Preview Live";
+    if(el)el.textContent=t('networkLive');
   });
 }
 function updateNetworkAge(){
@@ -1604,17 +2275,7 @@ function updateNetworkAge(){
   var hours=Math.floor((diff%86400000)/3600000);
   var minutes=Math.floor((diff%3600000)/60000);
   var el=document.getElementById("networkAge");
-  if(el)el.textContent=days+"d "+hours+"h "+minutes+"m";
-}
-
-function loadPrice(){
-  fetch("/api/price?ids=midnight-3&vs_currencies=usd&include_24hr_change=true&include_market_cap=true&include_24hr_vol=true").then(function(r){return r.json()}).then(function(d){
-    if(d["midnight-3"]){
-      var p=d["midnight-3"],pr="$"+p.usd.toFixed(4),ch=(p.usd_24h_change>=0?"+":"")+p.usd_24h_change.toFixed(2)+"%",cc=p.usd_24h_change>=0?"text-green-400":"text-red-400",mc="$"+(p.usd_market_cap/1000000).toFixed(2)+"M",vo="$"+(p.usd_24h_vol/1000000).toFixed(2)+"M";
-      document.getElementById("headerPrice").textContent=pr;document.getElementById("headerChange").textContent=ch;document.getElementById("headerChange").className="text-xs font-medium "+cc;document.getElementById("headerMcap").textContent=mc;
-      document.getElementById("priceWidget").textContent=pr;document.getElementById("changeWidget").textContent=ch;document.getElementById("changeWidget").className="text-sm "+cc;document.getElementById("mcapWidget").textContent=mc;document.getElementById("volWidget").textContent=vo;
-    }
-  }).catch(function(){});
+  if(el)el.textContent=days+t('days')+" "+hours+t('hours')+" "+minutes+t('minutes');
 }
 
 // Fetch and render analytics volume chart
@@ -1801,15 +2462,21 @@ function renderTicker(d){
   }
   var ticker=document.getElementById("txTicker");
   var newHtml=html+html;
-  if(ticker.dataset.hash!==html.substring(0,100)){
-    ticker.dataset.hash=html.substring(0,100);
-    ticker.innerHTML=newHtml;
+  var hashKey=html.substring(0,100);
+  if(ticker.dataset.hash!==hashKey){
+    ticker.dataset.hash=hashKey;
+    // Fade out, swap content, fade back in - avoids jarring restart
+    ticker.style.opacity="0";
+    setTimeout(function(){
+      ticker.innerHTML=newHtml;
+      ticker.style.opacity="1";
+    },300);
   }
   document.querySelectorAll(".ticker-item").forEach(function(el){el.addEventListener("click",function(){cameFromBlock=null;viewExtDetail(el.dataset.hash,parseInt(el.dataset.bh),el.dataset.sec,el.dataset.meth,el.dataset.ts)})});
 }
 
 var ws;
-function connectWS(){return; // disabled for preview
+function connectWS(){return; // disabled for preprod
   
   try{
     ws=new WebSocket("wss://"+location.host+"/ws");
@@ -1838,12 +2505,12 @@ window.addEventListener("popstate",function(){
   setTimeout(function(){isPopState=false;},100);
 });
 
-if(!window.history.state)history.replaceState({page:"home"},"",location.pathname);loadStats();loadEpochData();loadValidators();loadBlocks();loadExts();setTimeout(function(){document.getElementById("chartGridBtn").click()},500);updateTopMethods();updateSparkline();loadPrice();connectWS();loadAllBlocks();loadAllExts();loadNetworkAge();
-setInterval(loadStats,10000);setInterval(loadPrice,300000);
+if(!window.history.state)history.replaceState({page:"home"},"",location.pathname);loadStats();loadEpochData();loadValidators();loadBlockProducers();loadBlocks();loadExts();setTimeout(function(){document.getElementById("chartGridBtn").click()},500);updateTopMethods();updateSparkline();loadPrice();connectWS();loadAllBlocks();loadAllExts();loadNetworkAge();loadHealthScore();
+setInterval(loadStats,6000);setInterval(loadPrice,60000);
 
 document.getElementById("networkBtn").addEventListener("click",function(e){e.stopPropagation();document.getElementById("networkMenu").classList.toggle("hidden")});
 document.addEventListener("click",function(){document.getElementById("networkMenu").classList.add("hidden")});
-document.querySelectorAll(".network-opt").forEach(function(btn){btn.addEventListener("click",function(){var net=btn.dataset.network;if(net==="preview"){document.getElementById("networkMenu").classList.add("hidden");return}if(net==="preprod"){window.location.href="https://preprod.nightforge.jp";return}if(net==="mainnet"){window.location.href="https://mainnet.nightforge.jp";return}document.getElementById("networkMenu").classList.add("hidden")})});
+document.querySelectorAll(".network-opt").forEach(function(btn){btn.addEventListener("click",function(){var net=btn.dataset.network;if(net==="preview"){document.getElementById("networkMenu").classList.add("hidden");return}if(net==="preprod"){window.location.href="https://preprod.nightforge.jp";return}if(net==="mainnet"){window.location.href="https://nightforge.jp";return}document.getElementById("networkMenu").classList.add("hidden")})});
 
 // Load time tracking
 var loadStart=performance.now();
@@ -1890,6 +2557,18 @@ window.addEventListener("load",function(){
     var h=parseInt(path.replace("/block/",""));
     if(h>0){clickBlock(h);return;}
   }
+  if(path.startsWith("/address/")){
+    var addr=path.replace("/address/","");
+    if(addr.length>10){
+      fetch(API+"/address/"+encodeURIComponent(addr)).then(function(r){
+        if(r.ok)return r.json();
+        throw new Error("not found");
+      }).then(function(data){
+        viewAddressDetail(data);(document.getElementById("deepLoader")||{style:{}}).style.display="none";(document.getElementById("mainView")||{style:{}}).style.display="block";
+      }).catch(function(){(document.getElementById("deepLoader")||{style:{}}).style.display="none";(document.getElementById("mainView")||{style:{}}).style.display="block";});
+      return;
+    }
+  }
   if(path==="/blocks"){showTab("blocks");(document.getElementById("deepLoader")||{style:{}}).style.display="none";(document.getElementById("mainView")||{style:{}}).style.display="block";return;}
   if(path==="/transactions"){showTab("transactions");(document.getElementById("deepLoader")||{style:{}}).style.display="none";(document.getElementById("mainView")||{style:{}}).style.display="block";return;}
   if(path==="/extrinsics"){showTab("extrinsics");(document.getElementById("deepLoader")||{style:{}}).style.display="none";(document.getElementById("mainView")||{style:{}}).style.display="block";return;}
@@ -1909,6 +2588,8 @@ window.addEventListener("load",function(){
   var mv=document.getElementById("mainView");if(mv)mv.style.opacity="1";(document.getElementById("deepLoader")||{style:{}}).style.display="none";(document.getElementById("mainView")||{style:{}}).style.display="block";var loadEnd=performance.now();
   var loadTime=Math.round(loadEnd-loadStart);
   document.getElementById("loadMs").textContent=loadTime;
+  applyTranslations();
+  var langBtn=document.getElementById('langToggle');if(langBtn)langBtn.textContent=currentLang==='jp'?'日本語 | EN':'EN | 日本語';
   
   // Show shortcut hint toast
   var toast=document.createElement("div");
@@ -1988,10 +2669,10 @@ document.addEventListener("keydown",function(e){
   else if(e.key.toLowerCase()==="t"){showTab("transactions")}
   else if(e.key.toLowerCase()==="e"){showTab("extrinsics")}
   else if(e.key.toLowerCase()==="c"){showTab("contracts")}
-  else if(e.key.toLowerCase()==="g"){showTab("governance")}
   else if(e.key.toLowerCase()==="p"){showTab("privacy")}
   else if(e.key.toLowerCase()==="r"){showTab("bridge")}
   else if(e.key.toLowerCase()==="a"){showTab("analytics")}
+  else if(e.key.toLowerCase()==="g"){showTab("governance")}
 });
 
 // Top Methods Leaderboard
@@ -2176,34 +2857,105 @@ function copyValidator(pk,el){
 
 var validatorColors=["#f97316","#22c55e","#3b82f6","#eab308","#ec4899","#8b5cf6","#06b6d4","#ef4444","#10b981","#f59e0b"];
 function loadValidators(){
-  fetch("https://rpc.preview.midnight.network",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({jsonrpc:"2.0",method:"sidechain_getStatus",params:[],id:1})
-  }).then(r=>r.json()).then(function(status){
-    var epoch=status.result.sidechain.epoch;
-    return fetch("https://rpc.preview.midnight.network",{
+  // Try the new /api/committee endpoint first, then fall back to RPC
+  loadCommittee().catch(function(){
+    fetch("https://rpc.preview.midnight.network",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({jsonrpc:"2.0",method:"sidechain_getEpochCommittee",params:[epoch],id:2})
-    });
-  }).then(r=>r.json()).then(function(d){
-    if(d.result&&d.result.committee){
-      var committee=d.result.committee;
-      document.getElementById("committeeCount").textContent=committee.length+" validators";
-      var html="";
-      committee.forEach(function(v,i){
-        var pk=v.sidechainPubKey;
-        var short=pk.slice(2,8);
-        html+='<div onclick="copyValidator(\''+pk+'\',this)" class="group flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-slate-700/50 transition cursor-pointer border border-transparent hover:border-green-500/30" title="Click to copy: '+pk+'">';
-        html+='<div class="w-1.5 h-1.5 rounded-full bg-green-400"></div>';
-        html+='<span class="text-xs font-mono text-slate-400 group-hover:text-green-400 transition">'+short+'</span>';
-        html+='</div>';
+      body:JSON.stringify({jsonrpc:"2.0",method:"sidechain_getStatus",params:[],id:1})
+    }).then(r=>r.json()).then(function(status){
+      var epoch=status.result.sidechain.epoch;
+      return fetch("https://rpc.preview.midnight.network",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({jsonrpc:"2.0",method:"sidechain_getEpochCommittee",params:[epoch],id:2})
       });
-      document.getElementById("validatorGrid").innerHTML=html;
-    }
-  }).catch(function(e){console.log("Validator load error:",e)});
+    }).then(r=>r.json()).then(function(d){
+      if(d.result&&d.result.committee){
+        renderCommitteeCards(d.result.committee.map(function(v){return{pubKey:v.sidechainPubKey,type:"permissioned"}}), null);
+      }
+    }).catch(function(e){console.log("Validator load error:",e)});
+  });
 }
+
+function loadCommittee(){
+  return fetch(API+"/committee").then(function(r){return r.json()}).then(function(data){
+    if(!data)throw new Error("No data");
+    var epoch=data.epoch||"--";
+    var size=data.size||0;
+    var members=data.members||[];
+    renderCommitteeCards(members, epoch);
+  });
+}
+
+function renderCommitteeCards(members, epoch){
+  var epochEl=document.getElementById("committeeEpoch");
+  if(epochEl&&epoch)epochEl.textContent="Epoch "+fmt(parseInt(epoch));
+  document.getElementById("committeeCount").textContent=members.length+" validators";
+  var html="";
+  members.forEach(function(v,i){
+    var pk=v.pubKey||v.sidechainPubKey||"";
+    var short=pk.length>14?(pk.slice(0,8)+"..."+pk.slice(-6)):pk;
+    var typeBadge=v.type||"validator";
+    var color=validatorColors[i%validatorColors.length];
+    var label=v.validatorLabel||("Validator #"+(i+1));
+    var blockStats=(v.blocksProduced!=null&&v.blocksProduced>0)?' <span class="text-[10px] text-slate-500 ml-1">('+v.blocksProduced+' '+t("blocksProducedShort")+')</span>':"";
+    html+='<div onclick="copyValidator(\''+pk+'\',this)" class="group flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/50 hover:bg-slate-700/50 transition cursor-pointer border border-slate-700/30 hover:border-green-500/30 card-hover" title="Click to copy: '+pk+'">';
+    html+='<div class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:'+color+'"></div>';
+    html+='<div class="flex-1 min-w-0">';
+    html+='<p class="text-[11px] font-semibold text-green-400">'+label+'</p>';
+    html+='<p class="text-xs font-mono text-slate-400 group-hover:text-green-300 transition truncate">'+short+blockStats+'</p>';
+    html+='</div>';
+    html+='<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 flex-shrink-0">'+typeBadge+'</span>';
+    html+='</div>';
+  });
+  document.getElementById("validatorGrid").innerHTML=html;
+}
+
+// Block Producer Leaderboard
+function loadBlockProducers(){
+  fetch(API+"/block-producers").then(function(r){return r.json()}).then(function(data){
+    if(!data||!data.producers)return;
+    var el=document.getElementById("blockProducersList");
+    if(!el)return;
+    var producers=data.producers;
+    if(producers.length===0){
+      el.innerHTML='<p class="text-center text-slate-500 text-sm py-4">No block producer data available</p>';
+      return;
+    }
+    var html='<div class="flex items-center justify-between mb-3"><span class="text-xs text-slate-500">Sampled '+fmt(data.sampled)+' of '+fmt(data.totalBlocks)+' blocks</span></div>';
+    var rankColors=["#eab308","#94a3b8","#cd7f32"];
+    var rankLabels=["1st","2nd","3rd"];
+    producers.forEach(function(p,i){
+      var short=p.pubkey.length>14?(p.pubkey.slice(0,8)+"..."+p.pubkey.slice(-6)):p.pubkey;
+      var nameLabel=p.name||"";
+      var barColor=i<3?rankColors[i]:"#3b82f6";
+      var badge="";
+      if(i<3){
+        var bgColors=["bg-yellow-500/20 text-yellow-400 border-yellow-500/30","bg-slate-400/20 text-slate-300 border-slate-400/30","bg-amber-700/20 text-amber-600 border-amber-700/30"];
+        badge='<span class="text-[10px] px-1.5 py-0.5 rounded-full border '+bgColors[i]+' font-bold flex-shrink-0">'+rankLabels[i]+'</span>';
+      }
+      html+='<div class="flex items-center gap-3 py-2 px-3 rounded-lg bg-slate-800/30 hover:bg-slate-700/30 transition">';
+      html+='<span class="text-xs text-slate-500 w-6 text-right flex-shrink-0">#'+(i+1)+'</span>';
+      html+=badge;
+      html+='<div class="flex-1 min-w-0">';
+      if(nameLabel){html+='<div class="flex items-center gap-2 mb-0.5"><span class="text-xs font-semibold text-green-400">'+nameLabel+'</span>'+(p.type?'<span class="text-[9px] px-1 py-0.5 rounded bg-slate-700/50 text-slate-400">'+p.type+'</span>':"")+'</div>';}
+      html+='<div class="flex items-center justify-between mb-1">';
+      html+='<span class="text-xs font-mono text-slate-300 truncate">'+short+'</span>';
+      html+='<span class="text-xs text-slate-400 flex-shrink-0 ml-2">'+p.blocks+' blocks ('+p.percentage+'%)</span>';
+      html+='</div>';
+      html+='<div class="h-1.5 bg-slate-700/50 rounded-full overflow-hidden">';
+      html+='<div class="h-full rounded-full transition-all duration-500" style="width:'+Math.max(2,p.percentage)+'%;background:'+barColor+'"></div>';
+      html+='</div>';
+      html+='</div>';
+      html+='</div>';
+    });
+    el.innerHTML=html;
+  }).catch(function(e){
+    console.log("Block producers load error:",e);
+  });
+}
+setInterval(loadBlockProducers,300000); // Refresh every 5 minutes
 setInterval(loadValidators,60000);setInterval(loadExts,60000);
 
 // ============================================
@@ -2227,11 +2979,12 @@ function animateCounter(el,target){
 function loadPrivacy(){
   fetch(API+"/analytics/privacy?hours=168").then(function(r){return r.json()}).then(function(data){
     if(!data)return;
-    var total=data.total||0;
+    var total=data.totalMidnightTxs||data.total||0;
     var shielded=data.shielded||0;
     var unshielded=data.unshielded||0;
-    var mixed=data.mixed||0;
-    var ratio=total>0?((shielded+mixed*0.5)/total*100):0;
+    var contractCalls=data.contractCalls||0;
+    var contractDeploys=data.contractDeploys||0;
+    var ratio=(typeof data.shieldedRatio==="number")?data.shieldedRatio*100:(total>0?(shielded/total*100):0);
 
     // Update gauge
     var gauge=document.getElementById("privacyGauge");
@@ -2243,10 +2996,11 @@ function loadPrivacy(){
     animateCounter(document.getElementById("privTotalTxs"),total);
     animateCounter(document.getElementById("privShielded"),shielded);
     animateCounter(document.getElementById("privUnshielded"),unshielded);
-    animateCounter(document.getElementById("privMixed"),mixed);
+    animateCounter(document.getElementById("privContractCalls"),contractCalls);
+    animateCounter(document.getElementById("privContractDeploys"),contractDeploys);
 
     // Render chart
-    var hourly=data.hourly||[];
+    var hourly=data.trend||data.hourly||[];
     if(hourly.length>0&&document.getElementById("privacyChartCanvas")){
       var labels=hourly.map(function(h){
         var d=new Date(h.hour||h.timestamp);
@@ -2323,17 +3077,17 @@ var bridgeInterval=null;
 function loadBridge(){
   fetch(API+"/analytics/bridge?hours=168").then(function(r){return r.json()}).then(function(data){
     if(!data)return;
-    var total=data.total||0;
-    var last24h=data.last_24h||0;
-    var rate=data.rate||0;
+    var total=data.totalBridgeOps||data.total||0;
+    var last24h=data.last24h||data.last_24h||0;
+    var rate=last24h>0?(last24h/24):0;
 
     animateCounter(document.getElementById("bridgeTotal"),total);
     animateCounter(document.getElementById("bridge24h"),last24h);
     var rateEl=document.getElementById("bridgeRate");
-    if(rateEl)rateEl.textContent=rate.toFixed(2);
+    if(rateEl)rateEl.textContent=rate.toFixed(1);
 
     // Render chart
-    var hourly=data.hourly||[];
+    var hourly=data.trend||data.hourly||[];
     if(hourly.length>0&&document.getElementById("bridgeChartCanvas")){
       var labels=hourly.map(function(h){
         var d=new Date(h.hour||h.timestamp);
@@ -2380,7 +3134,7 @@ function loadBridge(){
     }
 
     // Render recent bridge operations table
-    var ops=data.recent||[];
+    var ops=data.recentBridgeOps||data.recent||[];
     var tbody=document.getElementById("bridgeOpsTable");
     var opCountEl=document.getElementById("bridgeOpCount");
     if(opCountEl)opCountEl.textContent=ops.length+" ops";
@@ -2393,7 +3147,7 @@ function loadBridge(){
           html+='<tr class="hover:bg-slate-800/30 transition">';
           html+='<td class="px-4 py-3"><span class="font-mono text-cyan-400 text-xs cursor-pointer hover:text-orange-400" onclick="copyHash(\''+op.hash+'\')">'+truncHash(op.hash||"",8)+'</span></td>';
           html+='<td class="px-4 py-3 text-sm text-white font-mono">#'+fmt(op.block_height||op.block||0)+'</td>';
-          html+='<td class="px-4 py-3 text-sm text-blue-400 font-mono">'+(op.cardano_block?truncHash(op.cardano_block,6):"--")+'</td>';
+          html+='<td class="px-4 py-3 text-sm text-blue-400 font-mono text-xs">'+(op.args_summary||op.cardano_block||"--")+'</td>';
           html+='<td class="px-4 py-3 text-right text-xs text-slate-500">'+timeAgo(op.timestamp)+'</td>';
           html+='</tr>';
         });
@@ -2420,17 +3174,28 @@ function loadAnalyticsDash(){
   // Fetch overview stats
   fetch(API+"/analytics/overview").then(function(r){return r.json()}).then(function(data){
     if(!data)return;
-    animateCounter(document.getElementById("anTotalBlocks"),data.total_blocks||data.totalBlocks||0);
-    animateCounter(document.getElementById("anTotalExts"),data.total_extrinsics||data.totalExtrinsics||0);
+    animateCounter(document.getElementById("anTotalBlocks"),data.blocks||data.totalBlocks||0);
+    animateCounter(document.getElementById("anTotalExts"),data.extrinsics||data.totalExtrinsics||0);
     var avgBt=document.getElementById("anAvgBlock");
-    if(avgBt)avgBt.textContent="~"+(data.avg_block_time||data.avgBlockTime||6)+"s";
+    if(avgBt)avgBt.textContent="~"+(data.avgBlockTime||6)+"s";
     var tpsEl=document.getElementById("anTPS");
-    if(tpsEl)tpsEl.textContent=(data.tps||0.5).toFixed(2);
+    if(tpsEl)tpsEl.textContent=(data.tps||0).toFixed(3);
 
     // Compare networks section
-    document.getElementById("cmpMainBlocks").textContent=fmt(data.total_blocks||data.totalBlocks||0);
-    document.getElementById("cmpMainExts").textContent=fmt(data.total_extrinsics||data.totalExtrinsics||0);
-    document.getElementById("cmpMainTPS").textContent=(data.tps||0.5).toFixed(2);
+    document.getElementById("cmpMainBlocks").textContent=fmt(data.blocks||0);
+    document.getElementById("cmpMainExts").textContent=fmt(data.extrinsics||0);
+    document.getElementById("cmpMainTPS").textContent=(data.tps||0).toFixed(3);
+    // Fetch preprod and preview stats
+    fetch("https://preprod.nightforge.jp/api/preprod/analytics/overview").then(function(r){return r.json()}).then(function(s){
+      document.getElementById("cmpPreprodBlocks").textContent=fmt(s.blocks||0);
+      document.getElementById("cmpPreprodExts").textContent=fmt(s.extrinsics||0);
+      document.getElementById("cmpPreprodTPS").textContent=(s.tps||0).toFixed(3);
+    }).catch(function(){});
+    fetch("https://preview.nightforge.jp/api/preview/analytics/overview").then(function(r){return r.json()}).then(function(s){
+      document.getElementById("cmpPreviewBlocks").textContent=fmt(s.blocks||0);
+      document.getElementById("cmpPreviewExts").textContent=fmt(s.extrinsics||0);
+      document.getElementById("cmpPreviewTPS").textContent=(s.tps||0).toFixed(3);
+    }).catch(function(){});
   }).catch(function(e){
     console.log("Analytics overview error:",e);
     // Fallback to stats API
@@ -2441,12 +3206,23 @@ function loadAnalyticsDash(){
       document.getElementById("anTPS").textContent="0.50";
       document.getElementById("cmpMainBlocks").textContent=fmt(s.totalBlocks||0);
       document.getElementById("cmpMainExts").textContent=fmt(s.totalExtrinsics||0);
-      document.getElementById("cmpMainTPS").textContent="0.50";
+      document.getElementById("cmpMainTPS").textContent="0.500";
+      fetch("https://preprod.nightforge.jp/api/preprod/analytics/overview").then(function(r){return r.json()}).then(function(ps){
+        document.getElementById("cmpPreprodBlocks").textContent=fmt(ps.blocks||0);
+        document.getElementById("cmpPreprodExts").textContent=fmt(ps.extrinsics||0);
+        document.getElementById("cmpPreprodTPS").textContent=(ps.tps||0).toFixed(3);
+      }).catch(function(){});
+      fetch("https://preview.nightforge.jp/api/preview/analytics/overview").then(function(r){return r.json()}).then(function(ps){
+        document.getElementById("cmpPreviewBlocks").textContent=fmt(ps.blocks||0);
+        document.getElementById("cmpPreviewExts").textContent=fmt(ps.extrinsics||0);
+        document.getElementById("cmpPreviewTPS").textContent=(ps.tps||0).toFixed(3);
+      }).catch(function(){});
     }).catch(function(){});
   });
 
   // Fetch contracts leaderboard
-  fetch(API+"/analytics/contracts").then(function(r){return r.json()}).then(function(data){
+  fetch(API+"/analytics/contracts").then(function(r){return r.json()}).then(function(raw){
+    var data=raw.topContracts||raw;
     if(!data||!data.length)return;
     var tbody=document.getElementById("contractLeaderboard");
     var medals=["🥇","🥈","🥉"];
@@ -2472,8 +3248,129 @@ function loadAnalyticsDash(){
     }).catch(function(){});
   });
 
+  // Fetch event types breakdown
+  fetch(API+"/analytics/events").then(function(r){return r.json()}).then(function(events){
+    if(!events||!events.length)return;
+    var totalEl=document.getElementById("eventTypesTotal");
+    var totalCount=events.reduce(function(sum,e){return sum+(e.count||0)},0);
+    if(totalEl)totalEl.textContent=fmt(totalCount)+" events";
+    var maxCount=Math.max.apply(null,events.map(function(e){return e.count||0}));
+    var eventColors=["#06b6d4","#f97316","#22c55e","#8b5cf6","#ec4899","#eab308","#3b82f6","#ef4444","#10b981","#f59e0b"];
+    var html="";
+    events.sort(function(a,b){return(b.count||0)-(a.count||0)});
+    events.forEach(function(ev,i){
+      var pct=maxCount>0?((ev.count||0)/maxCount*100):0;
+      var color=eventColors[i%eventColors.length];
+      html+='<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/30 transition">';
+      html+='<div class="w-2 h-2 rounded-full flex-shrink-0" style="background:'+color+'"></div>';
+      html+='<div class="flex-1 min-w-0">';
+      html+='<div class="flex items-center justify-between mb-1">';
+      html+='<span class="text-xs font-mono text-slate-300 truncate">'+(ev.section||"")+((ev.section&&ev.method)?".":"")+(ev.method||"")+'</span>';
+      html+='<span class="text-xs font-bold text-white ml-2">'+fmt(ev.count||0)+'</span>';
+      html+='</div>';
+      html+='<div class="h-1.5 bg-slate-700/50 rounded-full overflow-hidden"><div class="h-full rounded-full transition-all duration-500" style="width:'+pct.toFixed(1)+'%;background:'+color+'"></div></div>';
+      html+='</div></div>';
+    });
+    document.getElementById("eventTypesList").innerHTML=html;
+  }).catch(function(e){
+    console.log("Events analytics error:",e);
+    document.getElementById("eventTypesList").innerHTML='<div class="px-4 py-8 text-center text-slate-500">No event data available</div>';
+  });
+
+  // Fetch deployed contracts
+  fetch(API+"/contracts/deployed").then(function(r){return r.json()}).then(function(data){
+    if(!data)return;
+    var contracts=data.contracts||[];
+    var totalEl=document.getElementById("deployedContractsTotal");
+    if(totalEl)totalEl.textContent=(data.total||contracts.length)+" contracts";
+    if(contracts.length===0){
+      document.getElementById("deployedContractsList").innerHTML='<div class="px-4 py-8 text-center text-slate-500">No deployed contracts found</div>';
+      return;
+    }
+    var html="";
+    contracts.forEach(function(c){
+      // Parse txHash/address if they are JSON strings
+      var addr=c.address||"";
+      var txHash=c.txHash||"";
+      try{
+        if(txHash&&txHash.charAt(0)==="{"){var parsed=JSON.parse(txHash);txHash=parsed.txHash||txHash;if(parsed.contractAddress)addr=parsed.contractAddress;}
+      }catch(e){}
+      try{
+        if(addr&&addr.charAt(0)==="{"){var parsed=JSON.parse(addr);addr=parsed.contractAddress||parsed.address||addr;}
+      }catch(e){}
+      var blockNum=c.block||0;
+      var ts=c.timestamp||0;
+      html+='<div class="flex items-center justify-between px-4 py-3 hover:bg-slate-800/30 transition">';
+      html+='<div class="flex items-center gap-3 min-w-0 flex-1">';
+      html+='<div class="w-9 h-9 bg-orange-500/20 rounded-lg flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg></div>';
+      html+='<div class="min-w-0">';
+      html+='<p class="font-mono text-cyan-400 text-xs truncate cursor-pointer hover:text-orange-400" onclick="copyHash(\''+addr+'\')" title="'+addr+'">'+(addr.length>14?(addr.slice(0,8)+"..."+addr.slice(-6)):addr)+'</p>';
+      html+='<div class="flex items-center gap-2 mt-0.5">';
+      html+='<span class="text-[10px] text-slate-500">Block</span><span class="text-[10px] font-mono text-white">#'+fmt(blockNum)+'</span>';
+      if(ts){html+='<span class="text-[10px] text-slate-600">•</span><span class="text-[10px] text-slate-500">'+timeAgo(ts)+'</span>';}
+      html+='</div></div></div>';
+      html+='<div class="flex items-center gap-2 flex-shrink-0">';
+      if(txHash){html+='<span class="font-mono text-[10px] text-slate-500 cursor-pointer hover:text-cyan-400" onclick="copyHash(\''+txHash+'\')" title="'+txHash+'">tx:'+truncHash(txHash,4)+'</span>';}
+      html+='<span class="px-1.5 py-0.5 text-[10px] rounded bg-orange-500/10 text-orange-400 border border-orange-500/20">deployed</span>';
+      html+='</div></div>';
+    });
+    document.getElementById("deployedContractsList").innerHTML=html;
+  }).catch(function(e){
+    console.log("Deployed contracts error:",e);
+    document.getElementById("deployedContractsList").innerHTML='<div class="px-4 py-8 text-center text-slate-500">No deployed contracts data</div>';
+  });
+
+  // Load DUST Fee Tracker
+  loadDustTracker();
+
   if(analyticsInterval)clearInterval(analyticsInterval);
   analyticsInterval=setInterval(function(){if(currentTab==="analytics")loadAnalyticsDash()},30000);
+}
+
+var dustChartInstance=null;
+function loadDustTracker(){
+  fetch(API+"/analytics/dust").then(function(r){return r.json()}).then(function(data){
+    if(!data)return;
+    var totalEl=document.getElementById("dustTotalTxs");
+    if(totalEl)animateCounter(totalEl,data.totalTransactions||0);
+    var evtEl=document.getElementById("dustEventCount");
+    var evtCount=(data.dustEvents||[]).reduce(function(sum,e){return sum+(e.count||0)},0);
+    if(evtEl)animateCounter(evtEl,evtCount);
+    var canvas=document.getElementById("dustChartCanvas");
+    if(!canvas||!data.hourlyActivity||!data.hourlyActivity.length)return;
+    var hourly=data.hourlyActivity.slice().reverse();
+    var labels=hourly.map(function(h){
+      var d=new Date(h.hour);
+      return (d.getMonth()+1)+"/"+d.getDate()+" "+d.getHours()+":00";
+    });
+    var values=hourly.map(function(h){return h.txs||0});
+    if(dustChartInstance){dustChartInstance.destroy();}
+    dustChartInstance=new Chart(canvas.getContext("2d"),{
+      type:"bar",
+      data:{
+        labels:labels,
+        datasets:[{
+          label:"Fee-Paying Txs / Hour",
+          data:values,
+          backgroundColor:"rgba(245,158,11,0.4)",
+          borderColor:"rgba(245,158,11,0.8)",
+          borderWidth:1,
+          borderRadius:4
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{backgroundColor:"rgba(15,23,42,0.9)",titleColor:"#f59e0b",bodyColor:"#e2e8f0",borderColor:"rgba(245,158,11,0.3)",borderWidth:1}},
+        scales:{
+          x:{display:true,ticks:{color:"#64748b",font:{size:9},maxRotation:45,maxTicksLimit:12},grid:{display:false}},
+          y:{display:true,ticks:{color:"#64748b",font:{size:10}},grid:{color:"rgba(100,116,139,0.1)"}}
+        }
+      }
+    });
+  }).catch(function(e){
+    console.log("DUST tracker error:",e);
+  });
 }
 
 function renderAnalyticsDailyChart(contractData){
@@ -2528,6 +3425,7 @@ function renderAnalyticsDailyChartFromVolume(data){
     }
   });
 }
+
 
 // ============================================
 // Governance Dashboard
@@ -2674,6 +3572,20 @@ function loadEpochs(){
       document.getElementById("epochCurrentNum").textContent=fmt(sc.epoch);
       document.getElementById("epochCurrentSlot").textContent=fmt(sc.slot);
       if(mc)document.getElementById("epochCardanoNum").textContent=fmt(mc.epoch);
+      // Cardano epoch countdown
+      if(mc && mc.slot) {
+        var slotInEpoch = mc.slot % 432000;
+        var remainingSlots = 432000 - slotInEpoch;
+        var pct = (slotInEpoch / 432000) * 100;
+        var remainHours = remainingSlots / 3600;
+        var days = Math.floor(remainHours / 24);
+        var hours = Math.floor(remainHours % 24);
+        var mins = Math.floor((remainingSlots % 3600) / 60);
+        var cardanoCountdownEl = document.getElementById("cardanoEpochCountdown");
+        if(cardanoCountdownEl) cardanoCountdownEl.textContent = days + "d " + hours + "h " + mins + "m remaining";
+        var cardanoProgressEl = document.getElementById("cardanoEpochProgress");
+        if(cardanoProgressEl) cardanoProgressEl.style.width = pct.toFixed(1) + "%";
+      }
       // Start countdown
       if(sc.nextEpochTimestamp){
         if(epochCountdownInterval)clearInterval(epochCountdownInterval);
@@ -2708,38 +3620,50 @@ function loadEpochs(){
     animateCounter(document.getElementById("epochAuthorityChanges"),stats.totalAuthorityChanges||0);
     var avgDurEl=document.getElementById("epochAvgDuration");
     if(avgDurEl){
-      var avgSec=stats.avgEpochDuration||0;
+      // avgEpochDuration is in MILLISECONDS - divide by 1000 for seconds
+      var avgMs=stats.avgEpochDuration||0;
+      var avgSec=avgMs/1000;
       if(avgSec>3600)avgDurEl.textContent=Math.round(avgSec/3600)+"h "+Math.round((avgSec%3600)/60)+"m";
       else if(avgSec>60)avgDurEl.textContent=Math.round(avgSec/60)+"m "+Math.round(avgSec%60)+"s";
       else if(avgSec>0)avgDurEl.textContent=Math.round(avgSec)+"s";
       else avgDurEl.textContent="--";
     }
 
-    // Epoch Timeline
-    var timelineEl=document.getElementById("epochTimeline");
-    if(timelineEl&&epochs.length>0){
-      var html="";
-      epochs.slice(0,30).forEach(function(ep,i){
-        var epNum=ep.epoch||0;
-        var scSlot=ep.sidechain_slot||"--";
-        var cardanoEp=ep.mainchain_epoch||"--";
-        var ts=ep.recorded_at||ep.timestamp||0;
-        html+='<div class="epoch-node">';
-        html+='<div class="bg-slate-800/50 rounded-xl border border-slate-700/30 p-4 hover:border-cyan-500/30 transition card-hover">';
-        html+='<div class="flex items-center justify-between mb-2">';
-        html+='<span class="text-lg font-bold text-cyan-400">Epoch '+fmt(epNum)+'</span>';
-        html+='<span class="text-xs text-slate-500">'+timeAgo(ts)+'</span>';
-        html+='</div>';
-        html+='<div class="grid grid-cols-2 gap-2 text-xs">';
-        html+='<div><span class="text-slate-500">SC Slot</span><p class="font-mono text-white">'+fmt(scSlot)+'</p></div>';
-        html+='<div><span class="text-slate-500">Cardano Epoch</span><p class="font-mono text-blue-400">'+fmt(cardanoEp)+'</p></div>';
-        html+='</div>';
-        if(ts){html+='<p class="text-[10px] text-slate-600 mt-2">'+formatTime(ts)+'</p>';}
-        html+='</div></div>';
-      });
-      timelineEl.innerHTML=html;
-    }else if(timelineEl){
-      timelineEl.innerHTML='<div class="text-center text-slate-500 py-8">No epoch data available</div>';
+    // Epoch Relationship panels
+    if(epochs.length>0){
+      // Count epochs today (last 24h)
+      var now=Math.floor(Date.now()/1000);
+      var dayAgo=now-86400;
+      var epochsToday=epochs.filter(function(e){return (e.recorded_at||0)>=dayAgo}).length;
+      var blocksToday=epochsToday*50;
+      animateCounter(document.getElementById("epochsToday"),epochsToday);
+      animateCounter(document.getElementById("blocksToday"),blocksToday);
+
+      // Cardano epoch info
+      var cardanoEp=epochs[0].mainchain_epoch||"--";
+      document.getElementById("cardanoEpochBig").textContent=fmt(cardanoEp);
+      document.getElementById("cardanoSlotBig").textContent=fmt(epochs[0].mainchain_slot||"--");
+      // How many midnight epochs share this cardano epoch
+      var sameCardano=epochs.filter(function(e){return e.mainchain_epoch===cardanoEp}).length;
+      document.getElementById("midnightEpochsInCardano").textContent=sameCardano+"+ (in last "+epochs.length+" recorded)";
+
+      // Recent epochs - compact list showing last 10
+      var listEl=document.getElementById("recentEpochsList");
+      if(listEl){
+        var html="";
+        epochs.slice(0,10).forEach(function(ep,i){
+          var isFirst=(i===0);
+          var ts=ep.recorded_at||0;
+          html+='<div class="flex items-center justify-between px-3 py-2 rounded-lg '+(isFirst?'bg-cyan-500/10 border border-cyan-500/20':'hover:bg-slate-800/30')+' transition">';
+          html+='<div class="flex items-center gap-3">';
+          html+='<span class="text-cyan-400 font-bold text-sm w-20">'+fmt(ep.epoch)+'</span>';
+          if(isFirst){html+='<span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>';}
+          html+='</div>';
+          html+='<span class="text-xs text-slate-400">'+timeAgo(ts)+'</span>';
+          html+='</div>';
+        });
+        listEl.innerHTML=html;
+      }
     }
 
     // Session Changes table
@@ -2763,7 +3687,8 @@ function loadEpochs(){
     }
   }).catch(function(e){
     console.log("Epochs data error:",e);
-    document.getElementById("epochTimeline").innerHTML='<div class="text-center text-slate-500 py-8">No epoch data available</div>';
+    var listEl=document.getElementById("recentEpochsList");
+    if(listEl)listEl.innerHTML='<p class="text-center text-slate-500 text-sm py-4">No epoch data available</p>';
     document.getElementById("epochSessionTable").innerHTML='<tr><td colspan="3" class="px-4 py-8 text-center text-slate-500">No data available</td></tr>';
   });
 

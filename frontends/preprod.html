@@ -915,29 +915,27 @@
                 <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span id="cmpMainTPS" class="text-sm font-medium text-white">--</span></div>
               </div>
             </div>
-            <div class="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-5 opacity-60">
+            <div class="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-5">
               <div class="flex items-center gap-2 mb-4">
                 <div class="w-3 h-3 rounded-full bg-orange-400"></div>
-                <span class="font-bold text-orange-400">Preprod</span>
+                <a href="https://preprod.nightforge.jp" class="font-bold text-orange-400 hover:underline">Preprod</a>
               </div>
               <div class="space-y-2">
-                <div class="flex justify-between"><span class="text-xs text-slate-500">Blocks</span><span class="text-sm font-medium text-slate-500">--</span></div>
-                <div class="flex justify-between"><span class="text-xs text-slate-500">Extrinsics</span><span class="text-sm font-medium text-slate-500">--</span></div>
-                <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span class="text-sm font-medium text-slate-500">--</span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">Blocks</span><span id="cmpPreprodBlocks" class="text-sm font-medium text-white">--</span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">Extrinsics</span><span id="cmpPreprodExts" class="text-sm font-medium text-white">--</span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span id="cmpPreprodTPS" class="text-sm font-medium text-white">--</span></div>
               </div>
-              <p class="text-xs text-slate-600 mt-3 text-center">Coming soon</p>
             </div>
-            <div class="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5 opacity-60">
+            <div class="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5">
               <div class="flex items-center gap-2 mb-4">
                 <div class="w-3 h-3 rounded-full bg-cyan-400"></div>
-                <span class="font-bold text-cyan-400">Preview</span>
+                <a href="https://preview.nightforge.jp" class="font-bold text-cyan-400 hover:underline">Preview</a>
               </div>
               <div class="space-y-2">
-                <div class="flex justify-between"><span class="text-xs text-slate-500">Blocks</span><span class="text-sm font-medium text-slate-500">--</span></div>
-                <div class="flex justify-between"><span class="text-xs text-slate-500">Extrinsics</span><span class="text-sm font-medium text-slate-500">--</span></div>
-                <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span class="text-sm font-medium text-slate-500">--</span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">Blocks</span><span id="cmpPreviewBlocks" class="text-sm font-medium text-white">--</span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">Extrinsics</span><span id="cmpPreviewExts" class="text-sm font-medium text-white">--</span></div>
+                <div class="flex justify-between"><span class="text-xs text-slate-500">TPS</span><span id="cmpPreviewTPS" class="text-sm font-medium text-white">--</span></div>
               </div>
-              <p class="text-xs text-slate-600 mt-3 text-center">Coming soon</p>
             </div>
           </div>
         </div>
@@ -2512,7 +2510,7 @@ setInterval(loadStats,6000);setInterval(loadPrice,60000);
 
 document.getElementById("networkBtn").addEventListener("click",function(e){e.stopPropagation();document.getElementById("networkMenu").classList.toggle("hidden")});
 document.addEventListener("click",function(){document.getElementById("networkMenu").classList.add("hidden")});
-document.querySelectorAll(".network-opt").forEach(function(btn){btn.addEventListener("click",function(){var net=btn.dataset.network;if(net==="preview"){window.location.href="https://preview.nightforge.jp";return}if(net==="preprod"){window.location.href="https://preprod.nightforge.jp";return}if(net==="mainnet"){document.getElementById("networkMenu").classList.add("hidden");return}document.getElementById("networkMenu").classList.add("hidden")})});
+document.querySelectorAll(".network-opt").forEach(function(btn){btn.addEventListener("click",function(){var net=btn.dataset.network;if(net==="preview"){window.location.href="https://preview.nightforge.jp";return}if(net==="preprod"){document.getElementById("networkMenu").classList.add("hidden");return}if(net==="mainnet"){window.location.href="https://nightforge.jp";return}document.getElementById("networkMenu").classList.add("hidden")})});
 
 // Load time tracking
 var loadStart=performance.now();
@@ -3187,6 +3185,17 @@ function loadAnalyticsDash(){
     document.getElementById("cmpMainBlocks").textContent=fmt(data.blocks||0);
     document.getElementById("cmpMainExts").textContent=fmt(data.extrinsics||0);
     document.getElementById("cmpMainTPS").textContent=(data.tps||0).toFixed(3);
+    // Fetch preprod and preview stats
+    fetch("https://preprod.nightforge.jp/api/preprod/analytics/overview").then(function(r){return r.json()}).then(function(s){
+      document.getElementById("cmpPreprodBlocks").textContent=fmt(s.blocks||0);
+      document.getElementById("cmpPreprodExts").textContent=fmt(s.extrinsics||0);
+      document.getElementById("cmpPreprodTPS").textContent=(s.tps||0).toFixed(3);
+    }).catch(function(){});
+    fetch("https://preview.nightforge.jp/api/preview/analytics/overview").then(function(r){return r.json()}).then(function(s){
+      document.getElementById("cmpPreviewBlocks").textContent=fmt(s.blocks||0);
+      document.getElementById("cmpPreviewExts").textContent=fmt(s.extrinsics||0);
+      document.getElementById("cmpPreviewTPS").textContent=(s.tps||0).toFixed(3);
+    }).catch(function(){});
   }).catch(function(e){
     console.log("Analytics overview error:",e);
     // Fallback to stats API
@@ -3197,7 +3206,17 @@ function loadAnalyticsDash(){
       document.getElementById("anTPS").textContent="0.50";
       document.getElementById("cmpMainBlocks").textContent=fmt(s.totalBlocks||0);
       document.getElementById("cmpMainExts").textContent=fmt(s.totalExtrinsics||0);
-      document.getElementById("cmpMainTPS").textContent="0.50";
+      document.getElementById("cmpMainTPS").textContent="0.500";
+      fetch("https://preprod.nightforge.jp/api/preprod/analytics/overview").then(function(r){return r.json()}).then(function(ps){
+        document.getElementById("cmpPreprodBlocks").textContent=fmt(ps.blocks||0);
+        document.getElementById("cmpPreprodExts").textContent=fmt(ps.extrinsics||0);
+        document.getElementById("cmpPreprodTPS").textContent=(ps.tps||0).toFixed(3);
+      }).catch(function(){});
+      fetch("https://preview.nightforge.jp/api/preview/analytics/overview").then(function(r){return r.json()}).then(function(ps){
+        document.getElementById("cmpPreviewBlocks").textContent=fmt(ps.blocks||0);
+        document.getElementById("cmpPreviewExts").textContent=fmt(ps.extrinsics||0);
+        document.getElementById("cmpPreviewTPS").textContent=(ps.tps||0).toFixed(3);
+      }).catch(function(){});
     }).catch(function(){});
   });
 

@@ -3186,15 +3186,15 @@ function loadAnalyticsDash(){
     document.getElementById("cmpMainExts").textContent=fmt(data.extrinsics||0);
     document.getElementById("cmpMainTPS").textContent=(data.tps||0).toFixed(3);
     // Fetch preprod and preview stats
-    fetch("https://preprod.nightforge.jp/api/preprod/stats").then(function(r){return r.json()}).then(function(s){
-      document.getElementById("cmpPreprodBlocks").textContent=fmt(s.totalBlocks||s.blocks||0);
-      document.getElementById("cmpPreprodExts").textContent=fmt(s.totalExtrinsics||s.extrinsics||0);
-      document.getElementById("cmpPreprodTPS").textContent=(s.tps||0.5).toFixed?((s.tps||0).toFixed(3)):"0.500";
+    fetch("https://preprod.nightforge.jp/api/preprod/analytics/overview").then(function(r){return r.json()}).then(function(s){
+      document.getElementById("cmpPreprodBlocks").textContent=fmt(s.blocks||0);
+      document.getElementById("cmpPreprodExts").textContent=fmt(s.extrinsics||0);
+      document.getElementById("cmpPreprodTPS").textContent=(s.tps||0).toFixed(3);
     }).catch(function(){});
-    fetch("https://preview.nightforge.jp/api/preview/stats").then(function(r){return r.json()}).then(function(s){
-      document.getElementById("cmpPreviewBlocks").textContent=fmt(s.totalBlocks||s.blocks||0);
-      document.getElementById("cmpPreviewExts").textContent=fmt(s.totalExtrinsics||s.extrinsics||0);
-      document.getElementById("cmpPreviewTPS").textContent=(s.tps||0.5).toFixed?((s.tps||0).toFixed(3)):"0.500";
+    fetch("https://preview.nightforge.jp/api/preview/analytics/overview").then(function(r){return r.json()}).then(function(s){
+      document.getElementById("cmpPreviewBlocks").textContent=fmt(s.blocks||0);
+      document.getElementById("cmpPreviewExts").textContent=fmt(s.extrinsics||0);
+      document.getElementById("cmpPreviewTPS").textContent=(s.tps||0).toFixed(3);
     }).catch(function(){});
   }).catch(function(e){
     console.log("Analytics overview error:",e);
@@ -3207,14 +3207,14 @@ function loadAnalyticsDash(){
       document.getElementById("cmpMainBlocks").textContent=fmt(s.totalBlocks||0);
       document.getElementById("cmpMainExts").textContent=fmt(s.totalExtrinsics||0);
       document.getElementById("cmpMainTPS").textContent="0.500";
-      fetch("https://preprod.nightforge.jp/api/preprod/stats").then(function(r){return r.json()}).then(function(ps){
-        document.getElementById("cmpPreprodBlocks").textContent=fmt(ps.totalBlocks||0);
-        document.getElementById("cmpPreprodExts").textContent=fmt(ps.totalExtrinsics||0);
+      fetch("https://preprod.nightforge.jp/api/preprod/analytics/overview").then(function(r){return r.json()}).then(function(ps){
+        document.getElementById("cmpPreprodBlocks").textContent=fmt(ps.blocks||0);
+        document.getElementById("cmpPreprodExts").textContent=fmt(ps.extrinsics||0);
         document.getElementById("cmpPreprodTPS").textContent=(ps.tps||0).toFixed(3);
       }).catch(function(){});
-      fetch("https://preview.nightforge.jp/api/preview/stats").then(function(r){return r.json()}).then(function(ps){
-        document.getElementById("cmpPreviewBlocks").textContent=fmt(ps.totalBlocks||0);
-        document.getElementById("cmpPreviewExts").textContent=fmt(ps.totalExtrinsics||0);
+      fetch("https://preview.nightforge.jp/api/preview/analytics/overview").then(function(r){return r.json()}).then(function(ps){
+        document.getElementById("cmpPreviewBlocks").textContent=fmt(ps.blocks||0);
+        document.getElementById("cmpPreviewExts").textContent=fmt(ps.extrinsics||0);
         document.getElementById("cmpPreviewTPS").textContent=(ps.tps||0).toFixed(3);
       }).catch(function(){});
     }).catch(function(){});
