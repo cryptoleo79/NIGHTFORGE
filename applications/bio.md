@@ -1,3 +1,0 @@
-# Applicant Bio
-
-I am a blockchain developer based in Japan, building critical infrastructure for the Midnight network. I created NightForge Explorer (nightforge.jp), the most feature-rich block explorer available for Midnight, covering all three live networks -- mainnet, preprod, and preview -- from a single monorepo. With deep experience in privacy-preserving blockchain architecture, full-stack development, and the Japanese developer ecosystem, I am committed to making Midnight's zero-knowledge technology accessible to builders and users across Asia and beyond. NightForge Explorer is open source, live in production, and already tracking over 36,000 bridge operations, 19 deployed contracts, and 1,200+ contract calls across the Midnight network.

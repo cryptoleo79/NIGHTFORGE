@@ -3,3 +3,4 @@ data/*.db
 *.log
 .env
 dist/
+applications/

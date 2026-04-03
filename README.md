@@ -62,4 +62,4 @@ npx tsx src/index.ts
 
 ## License
 
-MIT
+Apache 2.0 - See [LICENSE](LICENSE)
